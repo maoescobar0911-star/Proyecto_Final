@@ -1,6 +1,6 @@
 const db = require('../config/db');
 
-// Obtener todas las dietas con sus alimentos
+// Obtener todas las dietas (versión simplificada)
 const obtenerDietas = (req, res) => {
     const sql = `
         SELECT 
@@ -22,8 +22,13 @@ const obtenerDietas = (req, res) => {
 
     db.query(sql, (err, results) => {
         if (err) {
-            console.log(err);
-            return res.status(500).json({ error: 'Error al obtener dietas' });
+            console.error('Error SQL:', err);
+            return res.status(500).json({ error: 'Error al obtener dietas', detalle: err.message });
+        }
+        
+        // Si no hay resultados, devolver array vacío
+        if (results.length === 0) {
+            return res.json([]);
         }
         
         // Organizar los datos por dieta
@@ -51,9 +56,19 @@ const obtenerDietas = (req, res) => {
     });
 };
 
-// Crear una nueva dieta (para después)
+// Crear nueva dieta
 const crearDieta = (req, res) => {
-    res.json({ msg: 'Próximamente: crear dieta' });
+    const { usuario_id, nombre, descripcion, total_calorias } = req.body;
+    
+    const sql = 'INSERT INTO dietas (usuario_id, nombre, descripcion, total_calorias) VALUES (?, ?, ?, ?)';
+    
+    db.query(sql, [usuario_id, nombre, descripcion, total_calorias], (err, result) => {
+        if (err) {
+            console.error('Error al crear dieta:', err);
+            return res.status(500).json({ error: 'Error al crear dieta' });
+        }
+        res.json({ msg: 'Dieta creada exitosamente', id: result.insertId });
+    });
 };
 
 module.exports = { obtenerDietas, crearDieta };
