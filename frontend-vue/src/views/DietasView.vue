@@ -2,104 +2,159 @@
   <div class="container">
     <h2 class="page-title">Mis Dietas</h2>
 
-    <!-- Estado de carga -->
-    <div v-if="cargando" class="loading">
-      <div class="spinner"></div>
-      Cargando dietas...
-    </div>
-
-    <!-- Error -->
-    <div v-else-if="error" class="error">
-      ❌ {{ error }}
-    </div>
-
-    <!-- Sin dietas -->
-    <div v-else-if="dietas.length === 0" class="error">
-      📭 No hay dietas disponibles. Crea una desde la base de datos.
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number">4</div>
+        <div class="stat-label">Dietas disponibles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">1,850</div>
+        <div class="stat-label">Calorías promedio</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">12</div>
+        <div class="stat-label">Alimentos registrados</div>
+      </div>
     </div>
 
     <!-- Grid de dietas -->
-    <div v-else class="dietas-grid">
-      <div v-for="dieta in dietas" :key="dieta.id" class="dieta-card">
+    <div class="dietas-grid">
+      <!-- Dieta 1 -->
+      <div class="dieta-card">
         <div class="card-header">
-          <h2>{{ dieta.nombre }}</h2>
-          <div class="usuario">👤 {{ dieta.usuario }}</div>
+          <h2>🔥 Dieta para bajar grasa</h2>
+          <div class="usuario">👤 Juan Perez</div>
         </div>
         <div class="card-body">
           <div class="info-item">
             <span class="info-label">📅 Fecha:</span>
-            <span class="info-value">{{ formatDate(dieta.fecha) }}</span>
+            <span class="info-value">15/04/2025</span>
           </div>
           <div class="info-item">
             <span class="info-label">📝 Descripción:</span>
-            <span class="info-value">{{ dieta.descripcion || 'Sin descripción' }}</span>
+            <span class="info-value">Comidas balanceadas para déficit calórico</span>
           </div>
           <div class="calorias-total">
             <div>🔥 Calorías totales</div>
-            <div class="valor">{{ dieta.total_calorias }} kcal</div>
+            <div class="valor">1,800 kcal</div>
           </div>
-          <div class="alimentos-titulo">
-            🍎 Alimentos ({{ dieta.alimentos.length }})
+          <div class="alimentos-titulo">🍎 Alimentos (4)</div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Pechuga de pollo</span>
+            <span>200g</span>
+            <span class="alimento-calorias">330 kcal</span>
           </div>
-          <div v-for="alimento in dieta.alimentos" :key="alimento.nombre" class="alimento-item">
-            <span class="alimento-nombre">{{ alimento.nombre }}</span>
-            <span>{{ alimento.cantidad }}g</span>
-            <span class="alimento-calorias">{{ Math.round(alimento.calorias) }} kcal</span>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Arroz blanco</span>
+            <span>150g</span>
+            <span class="alimento-calorias">195 kcal</span>
+          </div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Huevo</span>
+            <span>2 unidades</span>
+            <span class="alimento-calorias">310 kcal</span>
+          </div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Brócoli</span>
+            <span>100g</span>
+            <span class="alimento-calorias">55 kcal</span>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Stats -->
-    <div v-if="dietas.length > 0" class="stats">
-      <div class="stat-card">
-        <div class="stat-number">{{ dietas.length }}</div>
-        <div class="stat-label">Dietas disponibles</div>
+      <!-- Dieta 2 -->
+      <div class="dieta-card">
+        <div class="card-header">
+          <h2>💪 Dieta para ganar masa muscular</h2>
+          <div class="usuario">👤 Juan Perez</div>
+        </div>
+        <div class="card-body">
+          <div class="info-item">
+            <span class="info-label">📅 Fecha:</span>
+            <span class="info-value">10/04/2025</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">📝 Descripción:</span>
+            <span class="info-value">Alta en proteínas para ganar músculo</span>
+          </div>
+          <div class="calorias-total">
+            <div>🔥 Calorías totales</div>
+            <div class="valor">2,400 kcal</div>
+          </div>
+          <div class="alimentos-titulo">🍎 Alimentos (4)</div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Salmón</span>
+            <span>200g</span>
+            <span class="alimento-calorias">416 kcal</span>
+          </div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Pasta integral</span>
+            <span>200g</span>
+            <span class="alimento-calorias">310 kcal</span>
+          </div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Aguacate</span>
+            <span>100g</span>
+            <span class="alimento-calorias">160 kcal</span>
+          </div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Quinoa</span>
+            <span>150g</span>
+            <span class="alimento-calorias">180 kcal</span>
+          </div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number">{{ promedioCalorias }}</div>
-        <div class="stat-label">Calorías promedio</div>
+
+      <!-- Dieta 3 -->
+      <div class="dieta-card">
+        <div class="card-header">
+          <h2>🌱 Dieta vegetariana</h2>
+          <div class="usuario">👤 Maria Lopez</div>
+        </div>
+        <div class="card-body">
+          <div class="info-item">
+            <span class="info-label">📅 Fecha:</span>
+            <span class="info-value">05/04/2025</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">📝 Descripción:</span>
+            <span class="info-value">Sin carne, alta en vegetales</span>
+          </div>
+          <div class="calorias-total">
+            <div>🔥 Calorías totales</div>
+            <div class="valor">1,650 kcal</div>
+          </div>
+          <div class="alimentos-titulo">🍎 Alimentos (4)</div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Tofu</span>
+            <span>150g</span>
+            <span class="alimento-calorias">145 kcal</span>
+          </div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Lentejas</span>
+            <span>200g</span>
+            <span class="alimento-calorias">230 kcal</span>
+          </div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Quinoa</span>
+            <span>150g</span>
+            <span class="alimento-calorias">180 kcal</span>
+          </div>
+          <div class="alimento-item">
+            <span class="alimento-nombre">Espinacas</span>
+            <span>100g</span>
+            <span class="alimento-calorias">23 kcal</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
-
 export default {
-  name: 'DietasView',
-  data() {
-    return {
-      dietas: [],
-      cargando: true,
-      error: null
-    }
-  },
-  computed: {
-    promedioCalorias() {
-      if (this.dietas.length === 0) return 0
-      const total = this.dietas.reduce((sum, d) => sum + d.total_calorias, 0)
-      return Math.round(total / this.dietas.length)
-    }
-  },
-  methods: {
-    formatDate(date) {
-      return new Date(date).toLocaleDateString()
-    }
-  },
-  async mounted() {
-    try {
-      const response = await axios.get('http://localhost:3000/api/dietas')
-      this.dietas = response.data
-      this.error = null
-    } catch (err) {
-      this.error = 'Error al cargar las dietas. ¿El servidor backend está corriendo?'
-      console.error(err)
-    } finally {
-      this.cargando = false
-    }
-  }
+  name: 'DietasView'
 }
 </script>
 
@@ -117,11 +172,38 @@ export default {
   font-size: 2rem;
 }
 
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px 30px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  min-width: 150px;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #667eea;
+}
+
+.stat-label {
+  color: #666;
+  margin-top: 5px;
+}
+
 .dietas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 25px;
-  margin-bottom: 40px;
 }
 
 .dieta-card {
@@ -208,62 +290,5 @@ export default {
 .alimento-calorias {
   color: #ff6b6b;
   font-weight: bold;
-}
-
-.loading, .error {
-  text-align: center;
-  color: white;
-  font-size: 1.2rem;
-  padding: 50px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 15px;
-}
-
-.error {
-  background: rgba(255,0,0,0.2);
-  color: #ffcccc;
-}
-
-.spinner {
-  border: 3px solid rgba(255,255,255,0.3);
-  border-top: 3px solid white;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 15px auto;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.stats {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 40px;
-  flex-wrap: wrap;
-}
-
-.stat-card {
-  background: white;
-  border-radius: 15px;
-  padding: 20px 30px;
-  text-align: center;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  min-width: 150px;
-}
-
-.stat-number {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #667eea;
-}
-
-.stat-label {
-  color: #666;
-  margin-top: 5px;
 }
 </style>

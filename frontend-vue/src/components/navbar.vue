@@ -5,6 +5,9 @@
       <div class="nav-links">
         <router-link to="/">Inicio</router-link>
         <router-link to="/dietas">Mis Dietas</router-link>
+        <router-link to="/login" v-if="!token">Iniciar Sesión</router-link>
+        <router-link to="/registro" v-if="!token">Registrarse</router-link>
+        <button v-if="token" @click="cerrarSesion" class="btn-logout">Cerrar Sesión</button>
       </div>
     </div>
   </nav>
@@ -12,7 +15,24 @@
 
 <script>
 export default {
-  name: 'Navbar'
+  name: 'Navbar',
+  data() {
+    return {
+      token: localStorage.getItem('token')
+    }
+  },
+  methods: {
+    cerrarSesion() {
+      localStorage.removeItem('token')
+      this.token = null
+      this.$router.push('/login')
+    }
+  },
+  watch: {
+    '$route'() {
+      this.token = localStorage.getItem('token')
+    }
+  }
 }
 </script>
 
@@ -56,5 +76,19 @@ export default {
 .nav-links a.router-link-active {
   color: #667eea;
   font-weight: bold;
+}
+
+.btn-logout {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-logout:hover {
+  background: #c82333;
 }
 </style>
