@@ -1,67 +1,157 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { deleteJson, getJson, postJson, putJson } from '../services/api'
 
-const storageKey = 'planner-notes'
+const storageKey = 'planner-dietas'
 
 const form = reactive({
-  titulo: '',
-  categoria: 'Clase',
-  prioridad: 'Media',
-  contenido: '',
+  nombre: '',
+  objetivo: 'Mantenimiento',
+  calorias: 2000,
+  descripcion: '',
 })
 
-const notas = ref(JSON.parse(localStorage.getItem(storageKey) || '[]'))
+const dietas = ref(JSON.parse(localStorage.getItem(storageKey) || '[]'))
 const session = JSON.parse(localStorage.getItem('planner-session') || 'null')
+const sourceLabel = ref('Modo demostracion local')
 
-const totalPendientes = computed(() =>
-  notas.value.filter((nota) => !nota.completada).length,
+const totalActivas = computed(() =>
+  dietas.value.filter((dieta) => !dieta.completada).length,
 )
 
 const totalCompletadas = computed(() =>
-  notas.value.filter((nota) => nota.completada).length,
+  dietas.value.filter((dieta) => dieta.completada).length,
 )
 
-function guardarNotas() {
-  localStorage.setItem(storageKey, JSON.stringify(notas.value))
+const promedioCalorias = computed(() => {
+  if (!dietas.value.length) {
+    return 0
+  }
+
+  const total = dietas.value.reduce(
+    (acumulado, dieta) => acumulado + Number(dieta.total_calorias || 0),
+    0,
+  )
+
+  return Math.round(total / dietas.value.length)
+})
+
+function guardarDietas() {
+  localStorage.setItem(storageKey, JSON.stringify(dietas.value))
 }
 
-function crearNota() {
-  if (!form.titulo.trim() || !form.contenido.trim()) {
+async function cargarDietas() {
+  if (!session?.id) {
+    dietas.value = JSON.parse(localStorage.getItem(storageKey) || '[]')
+    sourceLabel.value = 'Modo demostracion local'
     return
   }
 
-  notas.value.unshift({
+  try {
+    const data = await getJson(`/dietas?usuario_id=${session.id}`)
+    dietas.value = data.map((dieta) => ({
+      id: dieta.id,
+      nombre: dieta.nombre,
+      descripcion: dieta.descripcion,
+      objetivo: dieta.objetivo,
+      total_calorias: Number(dieta.total_calorias),
+      completada: Boolean(dieta.completada),
+      fecha: new Date(dieta.fecha_creacion).toLocaleDateString(),
+    }))
+    sourceLabel.value = 'Conectado al backend'
+    guardarDietas()
+  } catch {
+    dietas.value = JSON.parse(localStorage.getItem(storageKey) || '[]')
+    sourceLabel.value = 'Modo demostracion local'
+  }
+}
+
+async function crearDieta() {
+  if (!form.nombre.trim() || !form.descripcion.trim()) {
+    return
+  }
+
+  const nuevaDieta = {
     id: Date.now(),
-    titulo: form.titulo.trim(),
-    categoria: form.categoria,
-    prioridad: form.prioridad,
-    contenido: form.contenido.trim(),
+    nombre: form.nombre.trim(),
+    descripcion: form.descripcion.trim(),
+    objetivo: form.objetivo,
+    total_calorias: Number(form.calorias),
     completada: false,
     fecha: new Date().toLocaleDateString(),
-  })
+  }
 
-  guardarNotas()
+  if (session?.id) {
+    try {
+      const data = await postJson('/dietas', {
+        usuario_id: session.id,
+        nombre: nuevaDieta.nombre,
+        descripcion: nuevaDieta.descripcion,
+        objetivo: nuevaDieta.objetivo,
+        total_calorias: nuevaDieta.total_calorias,
+      })
 
-  form.titulo = ''
-  form.categoria = 'Clase'
-  form.prioridad = 'Media'
-  form.contenido = ''
+      nuevaDieta.id = data.id
+      sourceLabel.value = 'Conectado al backend'
+    } catch {
+      sourceLabel.value = 'Modo demostracion local'
+    }
+  }
+
+  dietas.value.unshift(nuevaDieta)
+  guardarDietas()
+
+  form.nombre = ''
+  form.objetivo = 'Mantenimiento'
+  form.calorias = 2000
+  form.descripcion = ''
 }
 
-function alternarEstado(id) {
-  const nota = notas.value.find((item) => item.id === id)
-  if (!nota) {
+async function alternarEstado(id) {
+  const dieta = dietas.value.find((item) => item.id === id)
+  if (!dieta) {
     return
   }
 
-  nota.completada = !nota.completada
-  guardarNotas()
+  dieta.completada = !dieta.completada
+
+  if (session?.id && Number.isInteger(dieta.id)) {
+    try {
+      await putJson(`/dietas/${dieta.id}`, {
+        nombre: dieta.nombre,
+        descripcion: dieta.descripcion,
+        objetivo: dieta.objetivo,
+        total_calorias: dieta.total_calorias,
+        completada: dieta.completada,
+      })
+      sourceLabel.value = 'Conectado al backend'
+    } catch {
+      sourceLabel.value = 'Modo demostracion local'
+    }
+  }
+
+  guardarDietas()
 }
 
-function eliminarNota(id) {
-  notas.value = notas.value.filter((nota) => nota.id !== id)
-  guardarNotas()
+async function eliminarDieta(id) {
+  const dieta = dietas.value.find((item) => item.id === id)
+  dietas.value = dietas.value.filter((item) => item.id !== id)
+
+  if (session?.id && dieta && Number.isInteger(dieta.id)) {
+    try {
+      await deleteJson(`/dietas/${dieta.id}`)
+      sourceLabel.value = 'Conectado al backend'
+    } catch {
+      sourceLabel.value = 'Modo demostracion local'
+    }
+  }
+
+  guardarDietas()
 }
+
+onMounted(() => {
+  cargarDietas()
+})
 </script>
 
 <template>
@@ -69,86 +159,89 @@ function eliminarNota(id) {
     <div class="planner-header panel">
       <div>
         <p class="eyebrow">Panel principal</p>
-        <h2>Mis notas</h2>
+        <h2>Mis dietas</h2>
         <p class="subtitle">
           {{ session ? `Sesion activa: ${session.nombre}` : 'Modo demostracion sin sesion activa.' }}
         </p>
+        <p class="subtitle">{{ sourceLabel }}</p>
       </div>
 
       <div class="stats">
         <div class="stat">
-          <strong>{{ notas.length }}</strong>
-          <span>Total</span>
+          <strong>{{ dietas.length }}</strong>
+          <span>Planes</span>
         </div>
         <div class="stat">
-          <strong>{{ totalPendientes }}</strong>
-          <span>Pendientes</span>
+          <strong>{{ totalActivas }}</strong>
+          <span>Activas</span>
         </div>
         <div class="stat">
-          <strong>{{ totalCompletadas }}</strong>
-          <span>Listas</span>
+          <strong>{{ promedioCalorias }}</strong>
+          <span>Kcal promedio</span>
         </div>
       </div>
     </div>
 
     <div class="planner-grid">
-      <form class="editor panel" @submit.prevent="crearNota">
-        <h3>Nueva nota</h3>
-        <input v-model="form.titulo" type="text" placeholder="Titulo" required />
+      <form class="editor panel" @submit.prevent="crearDieta">
+        <h3>Nueva dieta</h3>
+        <input v-model="form.nombre" type="text" placeholder="Nombre del plan" required />
 
         <div class="split">
-          <select v-model="form.categoria">
-            <option>Clase</option>
-            <option>Tarea</option>
-            <option>Idea</option>
-            <option>Importante</option>
+          <select v-model="form.objetivo">
+            <option>Definicion</option>
+            <option>Mantenimiento</option>
+            <option>Volumen</option>
           </select>
 
-          <select v-model="form.prioridad">
-            <option>Alta</option>
-            <option>Media</option>
-            <option>Baja</option>
-          </select>
+          <input
+            v-model="form.calorias"
+            type="number"
+            min="1000"
+            step="50"
+            placeholder="Calorias"
+            required
+          />
         </div>
 
         <textarea
-          v-model="form.contenido"
+          v-model="form.descripcion"
           rows="7"
-          placeholder="Escribe tu nota aqui"
+          placeholder="Describe comidas, horarios o recomendaciones"
           required
         />
 
-        <button type="submit">Guardar nota</button>
+        <button type="submit">Guardar dieta</button>
       </form>
 
-      <div class="notes-list">
-        <article v-for="nota in notas" :key="nota.id" class="note panel">
-          <div class="note-top">
+      <div class="dietas-list">
+        <article v-for="dieta in dietas" :key="dieta.id" class="diet-card panel">
+          <div class="diet-top">
             <div>
-              <p class="chip">{{ nota.categoria }}</p>
-              <h3>{{ nota.titulo }}</h3>
+              <p class="chip">{{ dieta.objetivo }}</p>
+              <h3>{{ dieta.nombre }}</h3>
             </div>
-            <span class="priority" :data-priority="nota.prioridad">{{ nota.prioridad }}</span>
+            <span class="calories">{{ dieta.total_calorias }} kcal</span>
           </div>
 
-          <p class="note-body">{{ nota.contenido }}</p>
+          <p class="diet-body">{{ dieta.descripcion }}</p>
 
-          <div class="note-bottom">
-            <small>{{ nota.fecha }}</small>
+          <div class="diet-bottom">
+            <small>{{ dieta.fecha }}</small>
             <div class="actions">
-              <button class="ghost" type="button" @click="alternarEstado(nota.id)">
-                {{ nota.completada ? 'Marcar pendiente' : 'Completar' }}
+              <button class="ghost" type="button" @click="alternarEstado(dieta.id)">
+                {{ dieta.completada ? 'Marcar activa' : 'Completar plan' }}
               </button>
-              <button class="danger" type="button" @click="eliminarNota(nota.id)">
+              <button class="danger" type="button" @click="eliminarDieta(dieta.id)">
                 Eliminar
               </button>
             </div>
           </div>
         </article>
 
-        <div v-if="!notas.length" class="empty panel">
-          <h3>No hay notas todavia</h3>
-          <p>Crea una nota a la izquierda para empezar la demostracion.</p>
+        <div v-if="!dietas.length" class="empty panel">
+          <h3>No hay dietas todavia</h3>
+          <p>Crea una dieta a la izquierda para empezar la demostracion.</p>
         </div>
       </div>
     </div>
@@ -170,7 +263,7 @@ function eliminarNota(id) {
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #0284c7;
+  color: #c2410c;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-weight: 700;
@@ -179,12 +272,12 @@ function eliminarNota(id) {
 h2,
 h3 {
   margin: 0;
-  color: #0f172a;
+  color: #7c2d12;
 }
 
 .subtitle {
   margin: 8px 0 0;
-  color: #475569;
+  color: #57534e;
 }
 
 .stats {
@@ -194,21 +287,21 @@ h3 {
 }
 
 .stat {
-  min-width: 100px;
+  min-width: 110px;
   padding: 16px;
   border-radius: 18px;
-  background: #eff6ff;
+  background: #fff7ed;
   text-align: center;
 }
 
 .stat strong {
   display: block;
   font-size: 1.8rem;
-  color: #1d4ed8;
+  color: #c2410c;
 }
 
 .stat span {
-  color: #475569;
+  color: #57534e;
 }
 
 .planner-grid {
@@ -218,7 +311,7 @@ h3 {
 }
 
 .editor,
-.note,
+.diet-card,
 .empty {
   padding: 24px;
 }
@@ -242,8 +335,8 @@ select,
 textarea {
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
+  border: 1px solid #fed7aa;
+  background: #fffbeb;
 }
 
 textarea {
@@ -264,17 +357,17 @@ button {
 }
 
 .editor button {
-  background: #0f172a;
+  background: #7c2d12;
   color: white;
 }
 
-.notes-list {
+.dietas-list {
   display: grid;
   gap: 16px;
 }
 
-.note-top,
-.note-bottom {
+.diet-top,
+.diet-bottom {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -285,43 +378,30 @@ button {
   margin: 0 0 10px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #ffedd5;
+  color: #9a3412;
   font-size: 0.85rem;
   font-weight: 700;
 }
 
-.priority {
+.calories {
   align-self: start;
   padding: 7px 10px;
   border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
   font-size: 0.85rem;
   font-weight: 700;
 }
 
-.priority[data-priority='Alta'] {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.priority[data-priority='Media'] {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.priority[data-priority='Baja'] {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.note-body {
+.diet-body {
   margin: 16px 0;
-  color: #334155;
+  color: #44403c;
   line-height: 1.6;
   white-space: pre-wrap;
 }
 
-.note-bottom {
+.diet-bottom {
   align-items: center;
 }
 
@@ -332,8 +412,8 @@ button {
 }
 
 .ghost {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #ffedd5;
+  color: #9a3412;
 }
 
 .danger {
@@ -347,7 +427,7 @@ button {
 
 .empty p,
 small {
-  color: #64748b;
+  color: #78716c;
 }
 
 @media (max-width: 860px) {

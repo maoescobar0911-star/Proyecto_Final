@@ -1,27 +1,41 @@
--- Script para insertar datos de prueba
+CREATE DATABASE IF NOT EXISTS planeador_dietas;
+USE planeador_dietas;
+
 SET FOREIGN_KEY_CHECKS = 0;
 
-TRUNCATE TABLE dieta_alimentos;
-TRUNCATE TABLE dietas;
-TRUNCATE TABLE alimentos;
-TRUNCATE TABLE usuarios;
-
-INSERT INTO usuarios (id, nombre, email, password, peso, altura, objetivo) 
-VALUES (1, 'Juan Perez', 'juan@test.com', '123456', 75, 1.75, 'bajar');
-
-INSERT INTO alimentos (id, nombre, calorias, proteinas, grasas, carbohidratos) VALUES
-(1, 'Pechuga de pollo', 165, 31, 3.6, 0),
-(2, 'Arroz blanco', 130, 2.7, 0.3, 28),
-(3, 'Huevo', 155, 13, 11, 1.1),
-(4, 'Brócoli', 55, 3.7, 0.6, 11);
-
-INSERT INTO dietas (id, usuario_id, nombre, descripcion, total_calorias) 
-VALUES (1, 1, 'Dieta para bajar grasa', 'Comidas balanceadas', 1800);
-
-INSERT INTO dieta_alimentos (dieta_id, alimento_id, cantidad) VALUES
-(1, 1, 200),
-(1, 2, 150),
-(1, 3, 2),
-(1, 4, 100);
+DROP TABLE IF EXISTS dietas;
+DROP TABLE IF EXISTS usuarios;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE TABLE usuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  email VARCHAR(120) NOT NULL UNIQUE,
+  password VARCHAR(120) NOT NULL
+);
+
+CREATE TABLE dietas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  nombre VARCHAR(150) NOT NULL,
+  descripcion TEXT NOT NULL,
+  objetivo ENUM('Definicion', 'Mantenimiento', 'Volumen') NOT NULL DEFAULT 'Mantenimiento',
+  total_calorias INT NOT NULL,
+  completada TINYINT(1) NOT NULL DEFAULT 0,
+  fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_dietas_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON DELETE CASCADE
+);
+
+INSERT INTO usuarios (nombre, email, password)
+VALUES
+  ('Maria Escobar', 'maria@test.com', '123456'),
+  ('Invitado Demo', 'demo@test.com', '123456');
+
+INSERT INTO dietas (usuario_id, nombre, descripcion, objetivo, total_calorias, completada)
+VALUES
+  (1, 'Plan balanceado semanal', 'Desayuno con avena, almuerzo con pollo y cena ligera con ensalada.', 'Mantenimiento', 2100, 0),
+  (1, 'Definicion ligera', 'Enfocada en proteina alta, vegetales y control de carbohidratos.', 'Definicion', 1800, 0),
+  (2, 'Volumen limpio', 'Superavit moderado con arroz, pollo, huevos y frutas.', 'Volumen', 2800, 1);

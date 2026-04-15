@@ -2,22 +2,24 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// RUTAS - DEBEN ESTAR ANTES DEL app.listen
 app.use('/api/auth', require('./routes/auth'));
-app.use('/api/dietas', require('./routes/dieta'));  // 👈 ESTA LÍNEA
+app.use('/api/dietas', require('./routes/dieta'));
 
 app.get('/', (req, res) => {
-    res.send('🍽️ Servidor Planificador de Dietas funcionando');
+  res.send('Servidor del Planeador de Dietas funcionando');
 });
-// RUTA DE PRUEBA
+
 app.get('/api/test', (req, res) => {
-    res.json({ mensaje: 'Ruta de prueba funcionando' });
+  res.json({ mensaje: 'Ruta de prueba funcionando', api: 'dietas' });
 });
-app.listen(3000, () => {
-    console.log('🔥 Servidor en http://localhost:3000');
-    console.log('📡 API dietas: http://localhost:3000/api/dietas');
+
+app.listen(PORT, () => {
+  console.log(`Servidor en http://localhost:${PORT}`);
+  console.log(`API auth: http://localhost:${PORT}/api/auth`);
+  console.log(`API dietas: http://localhost:${PORT}/api/dietas`);
 });

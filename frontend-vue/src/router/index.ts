@@ -8,8 +8,8 @@ const routes = [
   { path: '/', name: 'home', component: HomeView },
   { path: '/login', name: 'login', component: LoginView },
   { path: '/registro', name: 'registro', component: RegistroView },
-  { path: '/notas', name: 'notas', component: DietasView },
-  { path: '/dietas', redirect: '/notas' },
+  { path: '/dietas', name: 'dietas', component: DietasView },
+  { path: '/notas', redirect: '/dietas' },
 ]
 
 const router = createRouter({

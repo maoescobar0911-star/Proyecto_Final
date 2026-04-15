@@ -3,14 +3,14 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">Proyecto final</p>
-        <h1>Planeador de Notas</h1>
+        <h1>Planeador de Dietas</h1>
       </div>
 
       <nav class="nav">
         <router-link to="/">Inicio</router-link>
         <router-link to="/login">Login</router-link>
         <router-link to="/registro">Registro</router-link>
-        <router-link to="/notas">Mis notas</router-link>
+        <router-link to="/dietas">Mis dietas</router-link>
       </nav>
     </header>
 
@@ -25,8 +25,8 @@
   font-family: Arial, Helvetica, sans-serif;
   color: #1f2937;
   background:
-    radial-gradient(circle at top, rgba(14, 165, 233, 0.25), transparent 30%),
-    linear-gradient(135deg, #f8fafc 0%, #dbeafe 45%, #e0f2fe 100%);
+    radial-gradient(circle at top, rgba(249, 115, 22, 0.18), transparent 30%),
+    linear-gradient(135deg, #fff7ed 0%, #fef3c7 45%, #ecfccb 100%);
 }
 
 * {
@@ -61,11 +61,11 @@ a {
   gap: 16px;
   margin-bottom: 24px;
   padding: 20px 24px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  border: 1px solid rgba(217, 119, 6, 0.22);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(12px);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 30px rgba(120, 53, 15, 0.08);
 }
 
 .topbar h1 {
@@ -78,7 +78,7 @@ a {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: #0369a1;
+  color: #c2410c;
 }
 
 .nav {
@@ -90,13 +90,13 @@ a {
 .nav a {
   padding: 10px 14px;
   border-radius: 999px;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #ffedd5;
+  color: #9a3412;
   font-weight: 700;
 }
 
 .nav a.router-link-active {
-  background: #0f172a;
+  background: #7c2d12;
   color: white;
 }
 
@@ -105,10 +105,10 @@ a {
 }
 
 .panel {
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  border: 1px solid rgba(217, 119, 6, 0.2);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 16px 40px rgba(120, 53, 15, 0.08);
 }
 
 @media (max-width: 760px) {

@@ -1,27 +1,39 @@
 <script setup>
 import { reactive, ref } from 'vue'
+import { postJson } from '../services/api'
 
 const form = reactive({
   email: '',
   password: '',
 })
 
-const message = ref('Ingresa con un usuario registrado en esta demo.')
+const message = ref('Ingresa con un usuario registrado para ver tus dietas.')
 
-function login() {
-  const usuarios = JSON.parse(localStorage.getItem('planner-users') || '[]')
-  const existe = usuarios.find(
-    (usuario) =>
-      usuario.email === form.email && usuario.password === form.password,
-  )
+async function login() {
+  try {
+    const data = await postJson('/auth/login', {
+      email: form.email,
+      password: form.password,
+    })
 
-  if (!existe) {
-    message.value = 'No encontramos ese usuario. Revisa tus datos o crea uno demo.'
+    localStorage.setItem('planner-session', JSON.stringify(data.user))
+    message.value = `Sesion iniciada con backend como ${data.user.nombre}.`
     return
-  }
+  } catch (error) {
+    const usuarios = JSON.parse(localStorage.getItem('planner-users') || '[]')
+    const existe = usuarios.find(
+      (usuario) =>
+        usuario.email === form.email && usuario.password === form.password,
+    )
 
-  localStorage.setItem('planner-session', JSON.stringify(existe))
-  message.value = `Sesion iniciada como ${existe.nombre}. Ya puedes mostrar el planeador.`
+    if (!existe) {
+      message.value = error.message || 'No encontramos ese usuario.'
+      return
+    }
+
+    localStorage.setItem('planner-session', JSON.stringify(existe))
+    message.value = `Sesion iniciada en modo demo como ${existe.nombre}.`
+  }
 }
 </script>
 
@@ -31,8 +43,8 @@ function login() {
       <p class="label">Acceso</p>
       <h2>Iniciar sesion</h2>
       <p class="description">
-        Esta vista funciona con almacenamiento local para que puedas demostrar el flujo
-        aunque la base de datos todavia este en construccion.
+        Esta vista intenta usar el backend y, si no responde, sigue funcionando en modo
+        demo local para que no se caiga tu presentacion.
       </p>
     </div>
 
@@ -60,7 +72,7 @@ function login() {
 
 .label {
   margin: 0 0 8px;
-  color: #0284c7;
+  color: #c2410c;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-weight: 700;
@@ -69,11 +81,11 @@ function login() {
 h2 {
   margin: 0;
   font-size: 2rem;
-  color: #0f172a;
+  color: #7c2d12;
 }
 
 .description {
-  color: #475569;
+  color: #57534e;
   line-height: 1.7;
 }
 
@@ -91,12 +103,12 @@ button {
 }
 
 input {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
+  background: #fffbeb;
+  border: 1px solid #fed7aa;
 }
 
 button {
-  background: #0f172a;
+  background: #7c2d12;
   color: white;
   font-weight: 700;
   cursor: pointer;
@@ -104,7 +116,7 @@ button {
 
 .message {
   margin: 0;
-  color: #0369a1;
+  color: #9a3412;
   line-height: 1.6;
 }
 

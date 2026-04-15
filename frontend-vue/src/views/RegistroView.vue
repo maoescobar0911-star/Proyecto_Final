@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, ref } from 'vue'
+import { postJson } from '../services/api'
 
 const form = reactive({
   nombre: '',
@@ -7,28 +8,39 @@ const form = reactive({
   password: '',
 })
 
-const message = ref('Crea un usuario de demostracion para la presentacion.')
+const message = ref('Crea un usuario para registrar y ver dietas.')
 
-function registrar() {
-  const usuarios = JSON.parse(localStorage.getItem('planner-users') || '[]')
-  const yaExiste = usuarios.some((usuario) => usuario.email === form.email)
+async function registrar() {
+  try {
+    const data = await postJson('/auth/register', {
+      nombre: form.nombre,
+      email: form.email,
+      password: form.password,
+    })
 
-  if (yaExiste) {
-    message.value = 'Ese correo ya existe en la demo. Usa otro o entra con login.'
-    return
+    localStorage.setItem('planner-session', JSON.stringify(data.user))
+    message.value = `Usuario ${data.user.nombre} creado en backend.`
+  } catch (error) {
+    const usuarios = JSON.parse(localStorage.getItem('planner-users') || '[]')
+    const yaExiste = usuarios.some((usuario) => usuario.email === form.email)
+
+    if (yaExiste) {
+      message.value = 'Ese correo ya existe en la demo. Usa otro o entra con login.'
+      return
+    }
+
+    const nuevoUsuario = {
+      id: Date.now(),
+      nombre: form.nombre,
+      email: form.email,
+      password: form.password,
+    }
+
+    usuarios.push(nuevoUsuario)
+    localStorage.setItem('planner-users', JSON.stringify(usuarios))
+    localStorage.setItem('planner-session', JSON.stringify(nuevoUsuario))
+    message.value = `Usuario ${form.nombre} creado en modo demo.`
   }
-
-  const nuevoUsuario = {
-    id: Date.now(),
-    nombre: form.nombre,
-    email: form.email,
-    password: form.password,
-  }
-
-  usuarios.push(nuevoUsuario)
-  localStorage.setItem('planner-users', JSON.stringify(usuarios))
-  localStorage.setItem('planner-session', JSON.stringify(nuevoUsuario))
-  message.value = `Usuario ${form.nombre} creado correctamente.`
 
   form.nombre = ''
   form.email = ''
@@ -40,9 +52,10 @@ function registrar() {
   <section class="auth-layout panel">
     <div>
       <p class="label">Registro</p>
-      <h2>Crear usuario demo</h2>
+      <h2>Crear usuario</h2>
       <p class="description">
-        Este registro te deja una cuenta local para mostrar el flujo de entrada y el manejo de notas.
+        Este registro intenta guardar en MySQL y, si el backend no esta disponible,
+        sigue funcionando con almacenamiento local.
       </p>
     </div>
 
@@ -71,7 +84,7 @@ function registrar() {
 
 .label {
   margin: 0 0 8px;
-  color: #0284c7;
+  color: #c2410c;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-weight: 700;
@@ -80,11 +93,11 @@ function registrar() {
 h2 {
   margin: 0;
   font-size: 2rem;
-  color: #0f172a;
+  color: #7c2d12;
 }
 
 .description {
-  color: #475569;
+  color: #57534e;
   line-height: 1.7;
 }
 
@@ -102,12 +115,12 @@ button {
 }
 
 input {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
+  background: #fffbeb;
+  border: 1px solid #fed7aa;
 }
 
 button {
-  background: #0284c7;
+  background: #ea580c;
   color: white;
   font-weight: 700;
   cursor: pointer;
@@ -115,7 +128,7 @@ button {
 
 .message {
   margin: 0;
-  color: #0369a1;
+  color: #9a3412;
   line-height: 1.6;
 }
 

@@ -1,11 +1,16 @@
 const express = require('express');
+
 const router = express.Router();
-const { obtenerDietas, crearDieta } = require('../controllers/dietaController');
+const {
+  obtenerDietas,
+  crearDieta,
+  actualizarDieta,
+  eliminarDieta,
+} = require('../controllers/dietaController');
 
-// GET /api/dietas - Obtener todas las dietas
 router.get('/', obtenerDietas);
-
-// POST /api/dietas - Crear nueva dieta
 router.post('/', crearDieta);
+router.put('/:id', actualizarDieta);
+router.delete('/:id', eliminarDieta);
 
 module.exports = router;
