@@ -1,57 +1,41 @@
 <template>
-  <nav class="navbar">
-    <div class="nav-container">
-      <h1 class="logo">🍽️ NutriApp</h1>
-      <div class="nav-links">
-        <router-link to="/">Inicio</router-link>
-        <router-link to="/dietas">Mis Dietas</router-link>
-        <router-link to="/login">Iniciar Sesión</router-link>
-        <router-link to="/registro">Registrarse</router-link>
-      </div>
-    </div>
-  </nav>
+  <div>
+    <!-- Barra de navegación -->
+    <nav style="background: white; padding: 15px; text-align: center;">
+      <router-link to="/" style="margin: 0 10px;">Inicio</router-link>
+      <router-link to="/login" style="margin: 0 10px;">Login</router-link>
+      <router-link to="/registro" style="margin: 0 10px;">Registro</router-link>
+      <router-link to="/dietas" style="margin: 0 10px;">Dietas</router-link>
+    </nav>
+
+    <!-- Contenido de la página -->
+    <router-view />
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'Navbar'
+  name: 'App'
 }
 </script>
 
-<style scoped>
-.navbar {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  padding: 1rem 0;
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
 }
 
-.logo {
-  color: #667eea;
-  font-size: 1.5rem;
-}
-
-.nav-links {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: #666;
-  transition: color 0.3s;
-}
-
-.nav-links a:hover {
-  color: #667eea;
+router-view {
+  display: block;
+  padding: 20px;
+  color: white;
+  text-align: center;
 }
 </style>
