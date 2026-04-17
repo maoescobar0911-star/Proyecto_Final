@@ -1,3 +1,30 @@
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+const session = ref(JSON.parse(localStorage.getItem('planner-session') || 'null'))
+
+watch(
+  () => route.fullPath,
+  () => {
+    session.value = JSON.parse(localStorage.getItem('planner-session') || 'null')
+  },
+  { immediate: true },
+)
+
+const isAuthView = computed(() =>
+  route.path === '/login' || route.path === '/registro',
+)
+
+function cerrarSesion() {
+  localStorage.removeItem('planner-session')
+  session.value = null
+  router.push('/login')
+}
+</script>
+
 <template>
   <div class="app-shell">
     <header class="topbar">
@@ -6,12 +33,20 @@
         <h1>Planeador de Dietas</h1>
       </div>
 
-      <nav class="nav">
-        <router-link to="/">Inicio</router-link>
-        <router-link to="/login">Login</router-link>
-        <router-link to="/registro">Registro</router-link>
-        <router-link to="/dietas">Mis dietas</router-link>
-      </nav>
+      <div class="topbar-actions">
+        <nav class="nav">
+          <router-link to="/">Inicio</router-link>
+          <router-link v-if="!session" to="/login">Login</router-link>
+          <router-link v-if="!session" to="/registro">Registro</router-link>
+          <router-link to="/dietas">Mis dietas</router-link>
+        </nav>
+
+        <div v-if="session" class="session-card">
+          <span>{{ session.nombre }}</span>
+          <button type="button" @click="cerrarSesion">Cerrar sesion</button>
+        </div>
+        <p v-else-if="!isAuthView" class="session-hint">Inicia sesion para guardar tu avance como estudiante.</p>
+      </div>
     </header>
 
     <main class="content">
@@ -87,6 +122,14 @@ a {
   gap: 10px;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .nav a {
   padding: 10px 14px;
   border-radius: 999px;
@@ -98,6 +141,34 @@ a {
 .nav a.router-link-active {
   background: #7c2d12;
   color: white;
+}
+
+.session-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 8px 14px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-weight: 700;
+}
+
+.session-card button {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: #7c2d12;
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.session-hint {
+  margin: 0;
+  color: #9a3412;
+  font-weight: 600;
 }
 
 .content {
@@ -120,6 +191,10 @@ a {
   .topbar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .topbar-actions {
+    justify-content: center;
   }
 
   .nav {
