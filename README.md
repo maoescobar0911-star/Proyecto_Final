@@ -1,21 +1,10 @@
 # Planeador de Dietas
 
-Proyecto estudiantil desarrollado como avance de proyecto final. La aplicacion permite registrar usuarios, iniciar sesion y administrar planes de dieta con objetivo, calorias y descripcion.
+Este proyecto fue desarrollado como avance del proyecto final. La idea principal es que un usuario pueda registrarse, iniciar sesion y organizar sus dietas de una forma sencilla.
 
-## Estado actual
+Por ahora el sistema ya permite crear, editar, completar y eliminar dietas. Tambien cuenta con conexion a backend y base de datos MySQL, aunque si algo falla durante la demostracion, el frontend puede seguir funcionando en modo local.
 
-En esta entrega ya se puede:
-
-- registrar usuarios
-- iniciar sesion
-- crear dietas
-- editar dietas
-- marcar dietas como completadas
-- eliminar dietas
-- trabajar con backend y MySQL
-- seguir funcionando en modo local si el backend falla durante la demo
-
-## Tecnologias usadas
+## Herramientas usadas
 
 - Vue 3
 - Vite
@@ -23,26 +12,25 @@ En esta entrega ya se puede:
 - Node.js
 - Express
 - MySQL
-- DBeaver o MySQL Workbench para gestionar la base de datos
 
-## Estructura del proyecto
+## Carpetas principales
 
-- `frontend-vue`: interfaz del sistema
-- `backend`: API, conexion a MySQL y script SQL inicial
+- `frontend-vue`: parte visual del proyecto
+- `backend`: servidor, rutas y conexion con la base de datos
 
 ## Como ejecutar el proyecto
 
-### 1. Base de datos
+### Base de datos
 
-Abrir MySQL en DBeaver o Workbench y ejecutar el archivo:
+Primero hay que abrir MySQL en DBeaver o Workbench y ejecutar el archivo:
 
 `backend/insertar_datos.sql`
 
-Ese script crea la base de datos `planeador_dietas`, las tablas principales y algunos datos de prueba.
+Ese script crea la base de datos y deja algunos datos de prueba.
 
-### 2. Backend
+### Backend
 
-Desde Git Bash:
+En Git Bash:
 
 ```bash
 cd /c/Users/mauri/Proyecto_Final/backend
@@ -50,13 +38,7 @@ npm install
 node server.js
 ```
 
-El backend corre en:
-
-- `http://localhost:3000`
-- `http://localhost:3000/api/test`
-- `http://localhost:3000/api/dietas?usuario_id=1`
-
-### 3. Frontend
+### Frontend
 
 En otra terminal:
 
@@ -66,7 +48,7 @@ npm install
 npm run dev
 ```
 
-Luego abrir en el navegador la URL que entregue Vite, normalmente:
+Despues abre en el navegador la direccion que te muestre Vite, normalmente:
 
 `http://localhost:5173`
 
@@ -75,17 +57,16 @@ Luego abrir en el navegador la URL que entregue Vite, normalmente:
 - `maria@test.com` / `123456`
 - `demo@test.com` / `123456`
 
-## Flujo para la presentacion
+## Que se puede mostrar en la exposicion
 
-1. Entrar a la pagina principal.
-2. Ir a registro o usar un usuario de prueba.
-3. Iniciar sesion.
-4. Entrar al panel de dietas.
-5. Crear una dieta.
-6. Editarla.
-7. Marcarla como completada.
-8. Eliminarla si se quiere mostrar el CRUD completo.
+- registro de usuario
+- inicio de sesion
+- panel de dietas
+- crear dieta
+- editar dieta
+- marcar dieta como completada
+- eliminar dieta
 
 ## Nota
 
-El frontend intenta guardar en backend y MySQL. Si el backend no esta disponible, la aplicacion mantiene un modo local para no detener la demostracion.
+La aplicacion intenta trabajar con backend y MySQL. Si el backend no responde, entra en modo local para que la demostracion no se detenga.
