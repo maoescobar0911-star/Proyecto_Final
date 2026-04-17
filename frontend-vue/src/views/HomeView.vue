@@ -1,5 +1,5 @@
 <script setup>
-const integrantes = [
+const avances = [
   'Registro e inicio de sesion',
   'CRUD de dietas',
   'Conexion con backend y MySQL',
@@ -12,11 +12,11 @@ const integrantes = [
     <section class="hero panel">
       <div class="hero-copy">
         <p class="tag">Avance del proyecto</p>
-        <h2>Planeador de dietas hecho como proyecto estudiantil, pensado para mostrar progreso real.</h2>
+        <h2>Planeador de dietas con un estilo simple, claro y listo para mostrar en clase.</h2>
         <p class="lead">
-          La idea del sistema es ayudar a registrar planes alimenticios de forma sencilla.
-          En esta entrega ya se puede iniciar sesion, crear dietas, editarlas y guardarlas
-          usando el backend cuando esta disponible.
+          Este proyecto busca organizar planes alimenticios de forma sencilla. En esta
+          entrega ya se puede registrar usuarios, iniciar sesion y administrar dietas
+          con una interfaz agradable y facil de explicar.
         </p>
 
         <div class="actions">
@@ -25,18 +25,12 @@ const integrantes = [
         </div>
       </div>
 
-      <div class="summary">
-        <div class="summary-card">
-          <strong>Objetivo del avance</strong>
-          <span>Mostrar que el proyecto ya tiene flujo funcional y estructura de aplicacion completa.</span>
-        </div>
-        <div class="summary-card">
-          <strong>Tecnologias</strong>
-          <span>Vue, Node, Express, MySQL y almacenamiento local para respaldo durante la exposicion.</span>
-        </div>
-        <div class="summary-card">
-          <strong>Estado actual</strong>
-          <span>Listo para registro, login, creacion, edicion y eliminacion de dietas.</span>
+      <div class="hero-note">
+        <div class="note-card">
+          <p class="note-label">Entrega actual</p>
+          <p class="note-text">
+            Ya hay flujo funcional entre vistas, panel de dietas y conexion con backend.
+          </p>
         </div>
       </div>
     </section>
@@ -48,14 +42,14 @@ const integrantes = [
       </div>
 
       <div class="checklist">
-        <div v-for="item in integrantes" :key="item" class="check-item">
+        <div v-for="item in avances" :key="item" class="check-item">
           <span class="dot"></span>
           <span>{{ item }}</span>
         </div>
       </div>
 
       <p class="teacher-note">
-        Esta version esta pensada para presentar avance funcional, no solo maquetas de interfaz.
+        Esta version esta pensada para presentar avance funcional, no solo una maqueta.
       </p>
     </section>
   </section>
@@ -69,9 +63,12 @@ const integrantes = [
 
 .hero {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: 1.5fr 0.9fr;
   gap: 24px;
-  padding: 32px;
+  padding: 34px;
+  background:
+    radial-gradient(circle at right top, rgba(251, 146, 60, 0.15), transparent 35%),
+    rgba(255, 255, 255, 0.9);
 }
 
 .tag {
@@ -84,15 +81,16 @@ const integrantes = [
 
 h2 {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3.4rem);
-  line-height: 1.08;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.1;
   color: #7c2d12;
 }
 
 .lead {
   margin: 18px 0 0;
+  max-width: 58ch;
   font-size: 1.05rem;
-  line-height: 1.8;
+  line-height: 1.85;
   color: #44403c;
 }
 
@@ -100,7 +98,7 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 26px;
 }
 
 .primary,
@@ -108,52 +106,65 @@ h2 {
   padding: 12px 18px;
   border-radius: 14px;
   font-weight: 700;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.primary:hover,
+.secondary:hover {
+  transform: translateY(-1px);
 }
 
 .primary {
   background: #7c2d12;
   color: white;
+  box-shadow: 0 10px 24px rgba(124, 45, 18, 0.18);
 }
 
 .secondary {
-  background: #ffedd5;
+  background: #fff1e6;
   color: #9a3412;
-}
-
-.summary {
-  display: grid;
-  gap: 14px;
-}
-
-.summary-card {
-  display: grid;
-  gap: 6px;
-  padding: 18px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, #fff7ed 0%, #fef3c7 100%);
   border: 1px solid #fed7aa;
 }
 
-.summary-card strong {
-  color: #7c2d12;
-  font-size: 1.05rem;
+.hero-note {
+  display: flex;
+  align-items: center;
 }
 
-.summary-card span {
+.note-card {
+  width: 100%;
+  padding: 22px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fffaf5 0%, #fff1e6 100%);
+  border: 1px solid #fed7aa;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.note-label {
+  margin: 0 0 10px;
+  color: #c2410c;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.note-text {
+  margin: 0;
   color: #57534e;
-  line-height: 1.6;
+  line-height: 1.75;
 }
 
 .board {
   padding: 26px;
   background:
-    linear-gradient(180deg, rgba(255, 247, 237, 0.95), rgba(255, 255, 255, 0.96)),
+    linear-gradient(180deg, rgba(255, 250, 245, 0.98), rgba(255, 255, 255, 0.96)),
     repeating-linear-gradient(
       0deg,
       transparent,
       transparent 31px,
-      rgba(217, 119, 6, 0.08) 31px,
-      rgba(217, 119, 6, 0.08) 32px
+      rgba(217, 119, 6, 0.06) 31px,
+      rgba(217, 119, 6, 0.06) 32px
     );
 }
 
@@ -169,7 +180,7 @@ h2 {
 h3 {
   margin: 0;
   color: #7c2d12;
-  font-size: 1.6rem;
+  font-size: 1.55rem;
 }
 
 .checklist {
