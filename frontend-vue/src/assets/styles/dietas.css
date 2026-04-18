@@ -1,0 +1,297 @@
+.planner {
+  display: grid;
+  gap: 20px;
+}
+
+.planner-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #15803d;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
+
+h2,
+h3 {
+  margin: 0;
+  color: #166534;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: #4b5c4b;
+}
+
+.feedback {
+  margin: 10px 0 0;
+  color: #166534;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  min-width: 110px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #f0fdf4;
+  text-align: center;
+}
+
+.stat strong {
+  display: block;
+  font-size: 1.8rem;
+  color: #15803d;
+}
+
+.stat span {
+  color: #4b5c4b;
+}
+
+.planner-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) 1fr;
+  gap: 20px;
+}
+
+.filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+.filter-title {
+  margin: 0 0 4px;
+  color: #15803d;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+}
+
+.filter-text {
+  color: #4b5c4b;
+  line-height: 1.6;
+}
+
+.editor,
+.diet-card,
+.empty {
+  padding: 24px;
+}
+
+.editor {
+  display: grid;
+  gap: 14px;
+  align-self: start;
+}
+
+.form-note {
+  margin: -2px 0 0;
+  color: #6b7c6b;
+  line-height: 1.6;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  border-radius: 14px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #bbf7d0;
+  background: #f7fee7;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+button {
+  border: 0;
+  padding: 12px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.editor button,
+.save {
+  background: #166534;
+  color: white;
+}
+
+.dietas-list {
+  display: grid;
+  gap: 16px;
+}
+
+.diet-edit {
+  display: grid;
+  gap: 12px;
+}
+
+.diet-card {
+  padding: 26px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 244, 0.96));
+}
+
+.diet-top,
+.diet-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.diet-main {
+  display: grid;
+  gap: 4px;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: inline-block;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.calories {
+  align-self: start;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: #ecfdf5;
+  color: #166534;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px #86efac;
+}
+
+.status {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.diet-title {
+  margin-top: 4px;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  color: #14532d;
+}
+
+.diet-meta {
+  margin: 0;
+  color: #15803d;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.status[data-done='true'] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status[data-done='false'] {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.diet-body {
+  margin: 18px 0 16px;
+  color: #3f4a3f;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  font-size: 0.98rem;
+}
+
+.diet-bottom {
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid rgba(34, 197, 94, 0.16);
+}
+
+.diet-date {
+  color: #6b7c6b;
+  font-size: 0.88rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ghost {
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.edit {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.empty {
+  text-align: center;
+}
+
+.empty p,
+small {
+  color: #6b7c6b;
+}
+
+@media (max-width: 860px) {
+  .filter-bar,
+  .planner-header,
+  .planner-grid {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .planner-header {
+    justify-content: initial;
+  }
+}
