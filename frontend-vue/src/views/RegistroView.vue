@@ -9,6 +9,7 @@ const form = reactive({
   password: '',
   altura: 1.7,
   pesoActual: 70,
+  objetivoPersonal: 'Mantener peso',
 })
 
 const message = ref('Crea un usuario para registrar y organizar dietas.')
@@ -40,6 +41,7 @@ async function registrar() {
       password: form.password,
       altura: Number(form.altura),
       peso_actual: Number(form.pesoActual),
+      objetivo_personal: form.objetivoPersonal,
     })
 
     saveSession(data.user)
@@ -60,8 +62,15 @@ async function registrar() {
       password: form.password,
       altura: Number(form.altura),
       peso_actual: Number(form.pesoActual),
+      objetivo_personal: form.objetivoPersonal,
       peso_ideal: Number(pesoIdeal.value),
       imc: Number(imc.value),
+      recomendacion:
+        form.objetivoPersonal === 'Bajar peso'
+          ? 'Te conviene un plan con control calorico y seguimiento semanal.'
+          : form.objetivoPersonal === 'Ganar masa'
+            ? 'Te conviene aumentar calorias y proteina de forma progresiva.'
+            : 'Tu meta puede centrarse en mantener un equilibrio alimenticio.',
     }
 
     usuarios.push(nuevoUsuario)
@@ -75,6 +84,7 @@ async function registrar() {
   form.password = ''
   form.altura = 1.7
   form.pesoActual = 70
+  form.objetivoPersonal = 'Mantener peso'
 }
 </script>
 
@@ -141,10 +151,20 @@ async function registrar() {
         />
       </label>
 
+      <label class="field">
+        <span>Objetivo personal</span>
+        <select v-model="form.objetivoPersonal">
+          <option>Bajar peso</option>
+          <option>Mantener peso</option>
+          <option>Ganar masa</option>
+        </select>
+      </label>
+
       <div class="helper-box" v-if="pesoIdeal && imc">
         <strong>Resumen rapido</strong>
         <span>Peso ideal estimado: {{ pesoIdeal }} kg</span>
         <span>IMC aproximado: {{ imc }}</span>
+        <span>Objetivo: {{ form.objetivoPersonal }}</span>
       </div>
 
       <button type="submit">Crear cuenta</button>

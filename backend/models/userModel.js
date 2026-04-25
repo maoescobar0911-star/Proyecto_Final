@@ -5,12 +5,29 @@ const findByEmail = (email, callback) => {
   db.query(sql, [email], callback);
 };
 
-const createUser = ({ nombre, email, password, altura, peso_actual }, callback) => {
-  const sql = 'INSERT INTO usuarios (nombre, email, password, altura, peso_actual) VALUES (?, ?, ?, ?, ?)';
-  db.query(sql, [nombre, email, password, altura, peso_actual], callback);
+const findAll = (callback) => {
+  const sql = `
+    SELECT
+      id,
+      nombre,
+      email,
+      altura,
+      peso_actual,
+      objetivo_personal
+    FROM usuarios
+    ORDER BY id DESC
+  `;
+
+  db.query(sql, callback);
+};
+
+const createUser = ({ nombre, email, password, altura, peso_actual, objetivo_personal }, callback) => {
+  const sql = 'INSERT INTO usuarios (nombre, email, password, altura, peso_actual, objetivo_personal) VALUES (?, ?, ?, ?, ?, ?)';
+  db.query(sql, [nombre, email, password, altura, peso_actual, objetivo_personal], callback);
 };
 
 module.exports = {
   findByEmail,
+  findAll,
   createUser,
 };

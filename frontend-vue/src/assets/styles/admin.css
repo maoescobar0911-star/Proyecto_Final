@@ -1,0 +1,60 @@
+.admin-view {
+  display: grid;
+  gap: 20px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.admin-section {
+  padding: 24px;
+}
+
+.section-head {
+  margin-bottom: 14px;
+}
+
+.data-list {
+  display: grid;
+  gap: 12px;
+}
+
+.data-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: #fbf4df;
+  border: 1px solid rgba(145, 128, 74, 0.16);
+}
+
+.data-card h4 {
+  margin: 0 0 6px;
+  color: #5c5a2d;
+}
+
+.data-card p {
+  margin: 0 0 6px;
+  color: #5b4f3a;
+}
+
+.data-card small,
+.empty-state p {
+  color: #7a6a4d;
+}
+
+@media (max-width: 860px) {
+  .admin-header,
+  .admin-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

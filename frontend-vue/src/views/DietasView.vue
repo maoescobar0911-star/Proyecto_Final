@@ -80,6 +80,21 @@ const clasificacionImc = computed(() => {
 
   return 'Obesidad'
 })
+const recomendacion = computed(() => {
+  if (session?.recomendacion) {
+    return session.recomendacion
+  }
+
+  if (session?.objetivo_personal === 'Bajar peso') {
+    return 'Te conviene un plan con control calorico y seguimiento semanal.'
+  }
+
+  if (session?.objetivo_personal === 'Ganar masa') {
+    return 'Te conviene aumentar calorias y proteina de forma progresiva.'
+  }
+
+  return 'Tu meta puede centrarse en mantener un equilibrio alimenticio.'
+})
 
 const totalActivas = computed(() =>
   dietas.value.filter((dieta) => !dieta.completada).length,
@@ -356,9 +371,18 @@ onMounted(() => {
           <strong>{{ imc || '--' }}</strong>
         </div>
         <div class="profile-item">
+          <span>Objetivo</span>
+          <strong>{{ session.objetivo_personal || 'Sin definir' }}</strong>
+        </div>
+        <div class="profile-item">
           <span>Clasificacion</span>
           <strong>{{ clasificacionImc || 'Sin datos' }}</strong>
         </div>
+      </div>
+
+      <div class="recommendation-box">
+        <p class="filter-title">Recomendacion automatica</p>
+        <p class="profile-text">{{ recomendacion }}</p>
       </div>
     </section>
 

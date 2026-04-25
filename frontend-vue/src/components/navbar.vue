@@ -26,6 +26,7 @@ const emit = defineEmits(['logout'])
         <router-link v-if="!session" to="/login">Login</router-link>
         <router-link v-if="!session" to="/registro">Registro</router-link>
         <router-link to="/dietas">Mis dietas</router-link>
+        <router-link v-if="session?.rol === 'admin'" to="/admin">Admin</router-link>
       </nav>
 
       <div v-if="session" class="session-card">

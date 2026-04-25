@@ -3,12 +3,13 @@ const {
   calcularPesoIdeal,
   calcularImc,
   clasificarImc,
+  generarRecomendacion,
 } = require('../utils/health');
 
 const register = (req, res) => {
-  const { nombre, email, password, altura, peso_actual } = req.body;
+  const { nombre, email, password, altura, peso_actual, objetivo_personal } = req.body;
 
-  if (!nombre || !email || !password || !altura || !peso_actual) {
+  if (!nombre || !email || !password || !altura || !peso_actual || !objetivo_personal) {
     return res.status(400).json({ msg: 'Todos los campos son obligatorios' });
   }
 
@@ -33,28 +34,43 @@ const register = (req, res) => {
     }
 
     userModel.createUser(
-      { nombre, email, password, altura: alturaNumero, peso_actual: pesoActualNumero },
+      {
+        nombre,
+        email,
+        password,
+        altura: alturaNumero,
+        peso_actual: pesoActualNumero,
+        objetivo_personal,
+      },
       (insertErr, insertResult) => {
-      if (insertErr) {
-        return res.status(500).json({ msg: 'Error al registrar usuario' });
-      }
+        if (insertErr) {
+          return res.status(500).json({ msg: 'Error al registrar usuario' });
+        }
 
-      const pesoIdeal = calcularPesoIdeal(alturaNumero);
-      const imc = calcularImc(pesoActualNumero, alturaNumero);
+        const pesoIdeal = calcularPesoIdeal(alturaNumero);
+        const imc = calcularImc(pesoActualNumero, alturaNumero);
+        const clasificacion = clasificarImc(imc);
 
-      return res.status(201).json({
-        msg: 'Usuario registrado correctamente',
-        user: {
-          id: insertResult.insertId,
-          nombre,
-          email,
-          altura: alturaNumero,
-          peso_actual: pesoActualNumero,
-          peso_ideal: pesoIdeal,
-          imc,
-          clasificacion_imc: clasificarImc(imc),
-        },
-      });
+        return res.status(201).json({
+          msg: 'Usuario registrado correctamente',
+          user: {
+            id: insertResult.insertId,
+            nombre,
+            email,
+            rol: email === 'admin@planeador.com' ? 'admin' : 'usuario',
+            altura: alturaNumero,
+            peso_actual: pesoActualNumero,
+            objetivo_personal,
+            peso_ideal: pesoIdeal,
+            imc,
+            clasificacion_imc: clasificacion,
+            recomendacion: generarRecomendacion({
+              objetivo_personal,
+              imc,
+              clasificacion,
+            }),
+          },
+        });
       },
     );
   });
@@ -82,17 +98,27 @@ const login = (req, res) => {
       return res.status(401).json({ msg: 'Contrasena incorrecta' });
     }
 
+    const imc = calcularImc(user.peso_actual, user.altura);
+    const clasificacion = clasificarImc(imc);
+
     return res.json({
       msg: 'Login exitoso',
       user: {
         id: user.id,
         nombre: user.nombre,
         email: user.email,
+        rol: user.email === 'admin@planeador.com' ? 'admin' : 'usuario',
         altura: Number(user.altura),
         peso_actual: Number(user.peso_actual),
+        objetivo_personal: user.objetivo_personal,
         peso_ideal: calcularPesoIdeal(user.altura),
-        imc: calcularImc(user.peso_actual, user.altura),
-        clasificacion_imc: clasificarImc(calcularImc(user.peso_actual, user.altura)),
+        imc,
+        clasificacion_imc: clasificacion,
+        recomendacion: generarRecomendacion({
+          objetivo_personal: user.objetivo_personal,
+          imc,
+          clasificacion,
+        }),
       },
     });
   });

@@ -9,6 +9,7 @@ app.use(express.json());
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/dietas', require('./routes/dieta'));
+app.use('/api/admin', require('./routes/admin'));
 
 app.get('/', (req, res) => {
   res.send('Servidor del Planeador de Dietas funcionando');

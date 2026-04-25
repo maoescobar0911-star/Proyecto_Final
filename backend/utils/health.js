@@ -43,9 +43,40 @@ function clasificarImc(imc) {
   return 'Obesidad';
 }
 
+function generarRecomendacion({ objetivo_personal, imc, clasificacion }) {
+  const objetivo = objetivo_personal || 'Mantener peso';
+
+  if (objetivo === 'Bajar peso') {
+    if (imc >= 25) {
+      return 'Te conviene un plan con deficit calorico moderado y seguimiento semanal.';
+    }
+
+    return 'Puedes bajar peso con cuidado, priorizando una alimentacion equilibrada.';
+  }
+
+  if (objetivo === 'Ganar masa') {
+    if (clasificacion === 'Bajo peso') {
+      return 'Te conviene aumentar calorias y proteina con control del progreso.';
+    }
+
+    return 'Puedes enfocarte en ganar masa con un superavit moderado y buena proteina.';
+  }
+
+  if (clasificacion === 'Peso saludable') {
+    return 'Tu perfil va bien para mantener peso con habitos constantes y buena distribucion de comidas.';
+  }
+
+  if (clasificacion === 'Sobrepeso' || clasificacion === 'Obesidad') {
+    return 'Un plan de mantenimiento con mejor calidad alimenticia puede ayudarte a estabilizar el progreso.';
+  }
+
+  return 'Mantener una rutina alimenticia ordenada te ayudara a ver mejor tu progreso.';
+}
+
 module.exports = {
   calcularPesoIdeal,
   calcularImc,
   clasificarImc,
+  generarRecomendacion,
   IDEAL_BMI,
 };

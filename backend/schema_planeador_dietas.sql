@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
   email VARCHAR(120) NOT NULL UNIQUE,
   password VARCHAR(120) NOT NULL,
   altura DECIMAL(3,2) NOT NULL,
-  peso_actual DECIMAL(5,2) NOT NULL DEFAULT 70.00
+  peso_actual DECIMAL(5,2) NOT NULL DEFAULT 70.00,
+  objetivo_personal ENUM('Bajar peso', 'Mantener peso', 'Ganar masa') NOT NULL DEFAULT 'Mantener peso'
 );
 
 CREATE TABLE IF NOT EXISTS dietas (
@@ -29,3 +30,6 @@ ADD COLUMN IF NOT EXISTS altura DECIMAL(3,2) NOT NULL DEFAULT 1.70;
 
 ALTER TABLE usuarios
 ADD COLUMN IF NOT EXISTS peso_actual DECIMAL(5,2) NOT NULL DEFAULT 70.00;
+
+ALTER TABLE usuarios
+ADD COLUMN IF NOT EXISTS objetivo_personal ENUM('Bajar peso', 'Mantener peso', 'Ganar masa') NOT NULL DEFAULT 'Mantener peso';
