@@ -1,41 +1,40 @@
-<template>
-  <div>
-    <!-- Barra de navegación -->
-    <nav style="background: white; padding: 15px; text-align: center;">
-      <router-link to="/" style="margin: 0 10px;">Inicio</router-link>
-      <router-link to="/login" style="margin: 0 10px;">Login</router-link>
-      <router-link to="/registro" style="margin: 0 10px;">Registro</router-link>
-      <router-link to="/dietas" style="margin: 0 10px;">Dietas</router-link>
-    </nav>
+<script setup>
+defineProps({
+  session: {
+    type: Object,
+    default: null,
+  },
+  isAuthView: {
+    type: Boolean,
+    default: false,
+  },
+})
 
-    <!-- Contenido de la página -->
-    <router-view />
-  </div>
-</template>
-
-<script>
-export default {
-  name: 'App'
-}
+const emit = defineEmits(['logout'])
 </script>
 
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+<template>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Proyecto final</p>
+      <h1>Planeador de Dietas</h1>
+    </div>
 
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-}
+    <div class="topbar-actions">
+      <nav class="nav">
+        <router-link to="/">Inicio</router-link>
+        <router-link v-if="!session" to="/login">Login</router-link>
+        <router-link v-if="!session" to="/registro">Registro</router-link>
+        <router-link to="/dietas">Mis dietas</router-link>
+      </nav>
 
-router-view {
-  display: block;
-  padding: 20px;
-  color: white;
-  text-align: center;
-}
-</style>
+      <div v-if="session" class="session-card">
+        <span>{{ session.nombre }}</span>
+        <button type="button" @click="emit('logout')">Cerrar sesion</button>
+      </div>
+      <p v-else-if="!isAuthView" class="session-hint">
+        Inicia sesion para guardar tu avance como estudiante.
+      </p>
+    </div>
+  </header>
+</template>

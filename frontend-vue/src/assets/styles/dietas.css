@@ -12,7 +12,7 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #15803d;
+  color: #8a6a22;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-weight: 700;
@@ -21,17 +21,17 @@
 h2,
 h3 {
   margin: 0;
-  color: #166534;
+  color: #5c5a2d;
 }
 
 .subtitle {
   margin: 8px 0 0;
-  color: #4b5c4b;
+  color: #5b4f3a;
 }
 
 .feedback {
   margin: 10px 0 0;
-  color: #166534;
+  color: #6b5a33;
   font-weight: 600;
   line-height: 1.6;
 }
@@ -46,18 +46,18 @@ h3 {
   min-width: 110px;
   padding: 16px;
   border-radius: 18px;
-  background: #f0fdf4;
+  background: #f5ecd3;
   text-align: center;
 }
 
 .stat strong {
   display: block;
   font-size: 1.8rem;
-  color: #15803d;
+  color: #8a6a22;
 }
 
 .stat span {
-  color: #4b5c4b;
+  color: #5b4f3a;
 }
 
 .planner-grid {
@@ -74,9 +74,49 @@ h3 {
   padding: 20px 24px;
 }
 
+.profile-card {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(217, 166, 65, 0.18), transparent 30%),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(245, 236, 211, 0.96));
+}
+
+.profile-text {
+  margin: 8px 0 0;
+  color: #5b4f3a;
+  line-height: 1.6;
+}
+
+.profile-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.profile-item {
+  padding: 16px;
+  border-radius: 18px;
+  background: #fbf4df;
+  border: 1px solid rgba(145, 128, 74, 0.18);
+}
+
+.profile-item span {
+  display: block;
+  color: #5b4f3a;
+  font-size: 0.88rem;
+  margin-bottom: 6px;
+}
+
+.profile-item strong {
+  color: #5c5a2d;
+  font-size: 1.1rem;
+}
+
 .filter-title {
   margin: 0 0 4px;
-  color: #15803d;
+  color: #8a6a22;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -84,7 +124,7 @@ h3 {
 }
 
 .filter-text {
-  color: #4b5c4b;
+  color: #5b4f3a;
   line-height: 1.6;
 }
 
@@ -102,7 +142,7 @@ h3 {
 
 .form-note {
   margin: -2px 0 0;
-  color: #6b7c6b;
+  color: #7a6a4d;
   line-height: 1.6;
 }
 
@@ -119,8 +159,8 @@ select,
 textarea {
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid #bbf7d0;
-  background: #f7fee7;
+  border: 1px solid #dcc78f;
+  background: #fffdf8;
 }
 
 textarea {
@@ -142,8 +182,8 @@ button {
 
 .editor button,
 .save {
-  background: #166534;
-  color: white;
+  background: #c89b2e;
+  color: #fffaf0;
 }
 
 .dietas-list {
@@ -159,7 +199,7 @@ button {
 .diet-card {
   padding: 26px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 253, 244, 0.96));
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(245, 236, 211, 0.96));
 }
 
 .diet-top,
@@ -185,8 +225,8 @@ button {
   margin: 0;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #dcfce7;
-  color: #166534;
+  background: #efe1bf;
+  color: #5c5a2d;
   font-size: 0.85rem;
   font-weight: 700;
 }
@@ -195,11 +235,11 @@ button {
   align-self: start;
   padding: 10px 12px;
   border-radius: 16px;
-  background: #ecfdf5;
-  color: #166534;
+  background: #fbf4df;
+  color: #5c5a2d;
   font-size: 0.95rem;
   font-weight: 700;
-  box-shadow: inset 0 0 0 1px #86efac;
+  box-shadow: inset 0 0 0 1px #dcc78f;
 }
 
 .status {
@@ -214,29 +254,29 @@ button {
   margin-top: 4px;
   font-size: 1.45rem;
   line-height: 1.2;
-  color: #14532d;
+  color: #5c5a2d;
 }
 
 .diet-meta {
   margin: 0;
-  color: #15803d;
+  color: #8a6a22;
   font-size: 0.92rem;
   font-weight: 600;
 }
 
 .status[data-done='true'] {
-  background: #dcfce7;
-  color: #166534;
+  background: #e6efda;
+  color: #5f6e38;
 }
 
 .status[data-done='false'] {
-  background: #dcfce7;
-  color: #15803d;
+  background: #efe1bf;
+  color: #8a6a22;
 }
 
 .diet-body {
   margin: 18px 0 16px;
-  color: #3f4a3f;
+  color: #5b4f3a;
   line-height: 1.75;
   white-space: pre-wrap;
   font-size: 0.98rem;
@@ -245,11 +285,11 @@ button {
 .diet-bottom {
   align-items: center;
   padding-top: 14px;
-  border-top: 1px solid rgba(34, 197, 94, 0.16);
+  border-top: 1px solid rgba(145, 128, 74, 0.16);
 }
 
 .diet-date {
-  color: #6b7c6b;
+  color: #7a6a4d;
   font-size: 0.88rem;
 }
 
@@ -260,18 +300,18 @@ button {
 }
 
 .ghost {
-  background: #ecfdf5;
-  color: #166534;
+  background: #fbf4df;
+  color: #5c5a2d;
 }
 
 .edit {
-  background: #dcfce7;
-  color: #166534;
+  background: #efe1bf;
+  color: #5c5a2d;
 }
 
 .danger {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: #f8e5df;
+  color: #9b4b3c;
 }
 
 .empty {
@@ -280,7 +320,7 @@ button {
 
 .empty p,
 small {
-  color: #6b7c6b;
+  color: #7a6a4d;
 }
 
 @media (max-width: 860px) {

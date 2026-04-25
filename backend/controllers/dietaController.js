@@ -1,33 +1,9 @@
-const db = require('../config/db');
+const dietaModel = require('../models/dietaModel');
 
 const obtenerDietas = (req, res) => {
   const { usuario_id } = req.query;
 
-  let sql = `
-    SELECT
-      d.id,
-      d.usuario_id,
-      u.nombre AS usuario,
-      d.nombre,
-      d.descripcion,
-      d.objetivo,
-      d.total_calorias,
-      d.completada,
-      d.fecha_creacion
-    FROM dietas d
-    JOIN usuarios u ON u.id = d.usuario_id
-  `;
-
-  const params = [];
-
-  if (usuario_id) {
-    sql += ' WHERE d.usuario_id = ?';
-    params.push(usuario_id);
-  }
-
-  sql += ' ORDER BY d.fecha_creacion DESC, d.id DESC';
-
-  db.query(sql, params, (err, results) => {
+  dietaModel.findAll(usuario_id, (err, results) => {
     if (err) {
       console.error('Error al obtener dietas:', err);
       return res.status(500).json({ error: 'Error al obtener dietas' });
@@ -52,14 +28,8 @@ const crearDieta = (req, res) => {
     });
   }
 
-  const sql = `
-    INSERT INTO dietas (usuario_id, nombre, descripcion, objetivo, total_calorias, completada)
-    VALUES (?, ?, ?, ?, ?, 0)
-  `;
-
-  db.query(
-    sql,
-    [usuario_id, nombre, descripcion, objetivo, total_calorias],
+  dietaModel.create(
+    { usuario_id, nombre, descripcion, objetivo, total_calorias },
     (err, result) => {
       if (err) {
         console.error('Error al crear dieta:', err);
@@ -78,15 +48,9 @@ const actualizarDieta = (req, res) => {
   const { id } = req.params;
   const { nombre, descripcion, objetivo, total_calorias, completada } = req.body;
 
-  const sql = `
-    UPDATE dietas
-    SET nombre = ?, descripcion = ?, objetivo = ?, total_calorias = ?, completada = ?
-    WHERE id = ?
-  `;
-
-  db.query(
-    sql,
-    [nombre, descripcion, objetivo, total_calorias, completada ? 1 : 0, id],
+  dietaModel.updateById(
+    id,
+    { nombre, descripcion, objetivo, total_calorias, completada },
     (err, result) => {
       if (err) {
         console.error('Error al actualizar dieta:', err);
@@ -105,7 +69,7 @@ const actualizarDieta = (req, res) => {
 const eliminarDieta = (req, res) => {
   const { id } = req.params;
 
-  db.query('DELETE FROM dietas WHERE id = ?', [id], (err, result) => {
+  dietaModel.deleteById(id, (err, result) => {
     if (err) {
       console.error('Error al eliminar dieta:', err);
       return res.status(500).json({ error: 'Error al eliminar dieta' });

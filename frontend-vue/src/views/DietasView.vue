@@ -1,8 +1,12 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { deleteJson, getJson, postJson, putJson } from '../services/api'
-
-const storageKey = 'planner-dietas'
+import {
+  createDieta,
+  fetchDietas,
+  removeDieta,
+  updateDieta,
+} from '../services/dietas'
+import { getLocalDietas, getSession, saveLocalDietas } from '../services/session'
 
 const form = reactive({
   nombre: '',
@@ -19,11 +23,63 @@ const editForm = reactive({
   descripcion: '',
 })
 
-const dietas = ref(JSON.parse(localStorage.getItem(storageKey) || '[]'))
-const session = JSON.parse(localStorage.getItem('planner-session') || 'null')
+const dietas = ref(getLocalDietas())
+const session = getSession()
 const sourceLabel = ref('Modo demostracion local')
 const feedback = ref('')
 const filterObjetivo = ref('Todos')
+const pesoIdeal = computed(() => {
+  if (session?.peso_ideal) {
+    return Number(session.peso_ideal).toFixed(1)
+  }
+
+  const altura = Number(session?.altura)
+
+  if (!altura || altura < 1 || altura > 2.5) {
+    return null
+  }
+
+  return (22 * altura * altura).toFixed(1)
+})
+const imc = computed(() => {
+  if (session?.imc) {
+    return Number(session.imc).toFixed(1)
+  }
+
+  const altura = Number(session?.altura)
+  const pesoActual = Number(session?.peso_actual)
+
+  if (!altura || !pesoActual || altura < 1 || altura > 2.5) {
+    return null
+  }
+
+  return (pesoActual / (altura * altura)).toFixed(1)
+})
+const clasificacionImc = computed(() => {
+  if (session?.clasificacion_imc) {
+    return session.clasificacion_imc
+  }
+
+  const valor = Number(imc.value)
+
+  if (!valor) {
+    return null
+  }
+
+  if (valor < 18.5) {
+    return 'Bajo peso'
+  }
+
+  if (valor < 25) {
+    return 'Peso saludable'
+  }
+
+  if (valor < 30) {
+    return 'Sobrepeso'
+  }
+
+  return 'Obesidad'
+})
 
 const totalActivas = computed(() =>
   dietas.value.filter((dieta) => !dieta.completada).length,
@@ -55,19 +111,19 @@ const dietasFiltradas = computed(() => {
 })
 
 function guardarDietas() {
-  localStorage.setItem(storageKey, JSON.stringify(dietas.value))
+  saveLocalDietas(dietas.value)
 }
 
 async function cargarDietas() {
   if (!session?.id) {
-    dietas.value = JSON.parse(localStorage.getItem(storageKey) || '[]')
+    dietas.value = getLocalDietas()
     sourceLabel.value = 'Modo demostracion local'
     feedback.value = 'Estas trabajando en modo local para que la demo no se detenga.'
     return
   }
 
   try {
-    const data = await getJson(`/dietas?usuario_id=${session.id}`)
+    const data = await fetchDietas(session.id)
     dietas.value = data.map((dieta) => ({
       id: dieta.id,
       nombre: dieta.nombre,
@@ -81,7 +137,7 @@ async function cargarDietas() {
     feedback.value = 'Tus dietas se cargaron correctamente desde el backend.'
     guardarDietas()
   } catch {
-    dietas.value = JSON.parse(localStorage.getItem(storageKey) || '[]')
+    dietas.value = getLocalDietas()
     sourceLabel.value = 'Modo demostracion local'
     feedback.value = 'No se pudo conectar al backend, pero la app sigue funcionando en modo local.'
   }
@@ -105,7 +161,7 @@ async function crearDieta() {
 
   if (session?.id) {
     try {
-      const data = await postJson('/dietas', {
+      const data = await createDieta({
         usuario_id: session.id,
         nombre: nuevaDieta.nombre,
         descripcion: nuevaDieta.descripcion,
@@ -144,7 +200,7 @@ async function alternarEstado(id) {
 
   if (session?.id && Number.isInteger(dieta.id)) {
     try {
-      await putJson(`/dietas/${dieta.id}`, {
+      await updateDieta(dieta.id, {
         nombre: dieta.nombre,
         descripcion: dieta.descripcion,
         objetivo: dieta.objetivo,
@@ -193,7 +249,7 @@ async function guardarEdicion(id) {
 
   if (session?.id && Number.isInteger(dieta.id)) {
     try {
-      await putJson(`/dietas/${dieta.id}`, {
+      await updateDieta(dieta.id, {
         nombre: dieta.nombre,
         descripcion: dieta.descripcion,
         objetivo: dieta.objetivo,
@@ -221,7 +277,7 @@ async function eliminarDieta(id) {
 
   if (session?.id && dieta && Number.isInteger(dieta.id)) {
     try {
-      await deleteJson(`/dietas/${dieta.id}`)
+      await removeDieta(dieta.id)
       sourceLabel.value = 'Conectado al backend'
       feedback.value = 'La dieta fue eliminada del backend.'
     } catch {
@@ -250,6 +306,9 @@ onMounted(() => {
         <p class="subtitle">
           {{ session ? `Sesion activa: ${session.nombre}` : 'Modo demostracion sin sesion activa.' }}
         </p>
+        <p v-if="session?.altura && pesoIdeal" class="subtitle">
+          Altura: {{ session.altura }} m | Peso ideal estimado: {{ pesoIdeal }} kg
+        </p>
         <p class="subtitle">{{ sourceLabel }}</p>
         <p class="feedback">{{ feedback }}</p>
       </div>
@@ -269,6 +328,39 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <section v-if="session" class="profile-card panel">
+      <div>
+        <p class="filter-title">Perfil nutricional</p>
+        <h3>{{ session.nombre }}</h3>
+        <p class="profile-text">
+          Resumen calculado con la altura y el peso actual registrados por el usuario.
+        </p>
+      </div>
+
+      <div class="profile-metrics">
+        <div class="profile-item">
+          <span>Altura</span>
+          <strong>{{ session.altura || '--' }} m</strong>
+        </div>
+        <div class="profile-item">
+          <span>Peso actual</span>
+          <strong>{{ session.peso_actual || '--' }} kg</strong>
+        </div>
+        <div class="profile-item">
+          <span>Peso ideal</span>
+          <strong>{{ pesoIdeal || '--' }} kg</strong>
+        </div>
+        <div class="profile-item">
+          <span>IMC</span>
+          <strong>{{ imc || '--' }}</strong>
+        </div>
+        <div class="profile-item">
+          <span>Clasificacion</span>
+          <strong>{{ clasificacionImc || 'Sin datos' }}</strong>
+        </div>
+      </div>
+    </section>
 
     <section class="filter-bar panel">
       <div>

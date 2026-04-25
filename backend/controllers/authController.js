@@ -1,16 +1,29 @@
-const db = require('../config/db');
+const userModel = require('../models/userModel');
+const {
+  calcularPesoIdeal,
+  calcularImc,
+  clasificarImc,
+} = require('../utils/health');
 
 const register = (req, res) => {
-  const { nombre, email, password } = req.body;
+  const { nombre, email, password, altura, peso_actual } = req.body;
 
-  if (!nombre || !email || !password) {
+  if (!nombre || !email || !password || !altura || !peso_actual) {
     return res.status(400).json({ msg: 'Todos los campos son obligatorios' });
   }
 
-  const checkSql = 'SELECT id FROM usuarios WHERE email = ? LIMIT 1';
-  const insertSql = 'INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)';
+  const alturaNumero = Number(altura);
+  const pesoActualNumero = Number(peso_actual);
 
-  db.query(checkSql, [email], (checkErr, results) => {
+  if (!alturaNumero || alturaNumero < 1 || alturaNumero > 2.5) {
+    return res.status(400).json({ msg: 'La altura debe estar en metros y ser valida' });
+  }
+
+  if (!pesoActualNumero || pesoActualNumero < 25 || pesoActualNumero > 300) {
+    return res.status(400).json({ msg: 'El peso actual debe ser valido en kilogramos' });
+  }
+
+  userModel.findByEmail(email, (checkErr, results) => {
     if (checkErr) {
       return res.status(500).json({ msg: 'Error al validar el usuario' });
     }
@@ -19,10 +32,15 @@ const register = (req, res) => {
       return res.status(409).json({ msg: 'El correo ya esta registrado' });
     }
 
-    db.query(insertSql, [nombre, email, password], (insertErr, insertResult) => {
+    userModel.createUser(
+      { nombre, email, password, altura: alturaNumero, peso_actual: pesoActualNumero },
+      (insertErr, insertResult) => {
       if (insertErr) {
         return res.status(500).json({ msg: 'Error al registrar usuario' });
       }
+
+      const pesoIdeal = calcularPesoIdeal(alturaNumero);
+      const imc = calcularImc(pesoActualNumero, alturaNumero);
 
       return res.status(201).json({
         msg: 'Usuario registrado correctamente',
@@ -30,9 +48,15 @@ const register = (req, res) => {
           id: insertResult.insertId,
           nombre,
           email,
+          altura: alturaNumero,
+          peso_actual: pesoActualNumero,
+          peso_ideal: pesoIdeal,
+          imc,
+          clasificacion_imc: clasificarImc(imc),
         },
       });
-    });
+      },
+    );
   });
 };
 
@@ -43,9 +67,7 @@ const login = (req, res) => {
     return res.status(400).json({ msg: 'Email y contrasena son obligatorios' });
   }
 
-  const sql = 'SELECT * FROM usuarios WHERE email = ? LIMIT 1';
-
-  db.query(sql, [email], (err, results) => {
+  userModel.findByEmail(email, (err, results) => {
     if (err) {
       return res.status(500).json({ msg: 'Error al iniciar sesion' });
     }
@@ -66,6 +88,11 @@ const login = (req, res) => {
         id: user.id,
         nombre: user.nombre,
         email: user.email,
+        altura: Number(user.altura),
+        peso_actual: Number(user.peso_actual),
+        peso_ideal: calcularPesoIdeal(user.altura),
+        imc: calcularImc(user.peso_actual, user.altura),
+        clasificacion_imc: clasificarImc(calcularImc(user.peso_actual, user.altura)),
       },
     });
   });
