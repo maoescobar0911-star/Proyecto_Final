@@ -47,11 +47,23 @@ async function registrar() {
     saveSession(data.user)
     message.value = `Usuario ${data.user.nombre} creado correctamente.`
   } catch (error) {
+    const mensaje = error instanceof Error ? error.message : 'Error al registrar usuario.'
+
+    const esModoLocal =
+      mensaje.includes('Failed to fetch') ||
+      mensaje.includes('NetworkError') ||
+      mensaje.includes('fetch')
+
     const usuarios = getLocalUsers()
     const yaExiste = usuarios.some((usuario) => usuario.email === form.email)
 
     if (yaExiste) {
       message.value = 'Ese correo ya existe en la demo. Usa otro o entra con login.'
+      return
+    }
+
+    if (!esModoLocal) {
+      message.value = `No se guardo en backend: ${mensaje}`
       return
     }
 
@@ -76,7 +88,7 @@ async function registrar() {
     usuarios.push(nuevoUsuario)
     saveLocalUsers(usuarios)
     saveSession(nuevoUsuario)
-    message.value = `Usuario ${form.nombre} creado en modo demo local.`
+    message.value = `Usuario ${form.nombre} creado en modo demo local porque el backend no respondio.`
   }
 
   form.nombre = ''

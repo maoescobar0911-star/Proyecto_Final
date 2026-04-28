@@ -6,7 +6,18 @@ import {
   removeDieta,
   updateDieta,
 } from '../services/dietas'
-import { getLocalDietas, getSession, saveLocalDietas } from '../services/session'
+import {
+  createRegistroPeso,
+  fetchProgreso,
+  removeRegistroPeso,
+} from '../services/progreso'
+import {
+  getLocalDietas,
+  getLocalProgreso,
+  getSession,
+  saveLocalDietas,
+  saveLocalProgreso,
+} from '../services/session'
 
 const form = reactive({
   nombre: '',
@@ -24,6 +35,7 @@ const editForm = reactive({
 })
 
 const dietas = ref(getLocalDietas())
+const progreso = ref(getLocalProgreso())
 const session = getSession()
 const sourceLabel = ref('Modo demostracion local')
 const feedback = ref('')
@@ -95,6 +107,22 @@ const recomendacion = computed(() => {
 
   return 'Tu meta puede centrarse en mantener un equilibrio alimenticio.'
 })
+const progresoForm = reactive({
+  peso: Number(session?.peso_actual || 70),
+  fecha: new Date().toISOString().slice(0, 10),
+  nota: '',
+})
+const ultimoRegistro = computed(() => progreso.value[0] || null)
+const variacionPeso = computed(() => {
+  if (progreso.value.length < 2) {
+    return null
+  }
+
+  const actual = Number(progreso.value[0].peso)
+  const anterior = Number(progreso.value[1].peso)
+
+  return (actual - anterior).toFixed(1)
+})
 
 const totalActivas = computed(() =>
   dietas.value.filter((dieta) => !dieta.completada).length,
@@ -129,6 +157,10 @@ function guardarDietas() {
   saveLocalDietas(dietas.value)
 }
 
+function guardarProgresoLocal() {
+  saveLocalProgreso(progreso.value)
+}
+
 async function cargarDietas() {
   if (!session?.id) {
     dietas.value = getLocalDietas()
@@ -155,6 +187,26 @@ async function cargarDietas() {
     dietas.value = getLocalDietas()
     sourceLabel.value = 'Modo demostracion local'
     feedback.value = 'No se pudo conectar al backend, pero la app sigue funcionando en modo local.'
+  }
+}
+
+async function cargarProgreso() {
+  if (!session?.id) {
+    progreso.value = getLocalProgreso()
+    return
+  }
+
+  try {
+    const data = await fetchProgreso(session.id)
+    progreso.value = data.map((registro) => ({
+      id: registro.id,
+      peso: Number(registro.peso),
+      nota: registro.nota || '',
+      fecha: registro.fecha_registro,
+    }))
+    guardarProgresoLocal()
+  } catch {
+    progreso.value = getLocalProgreso()
   }
 }
 
@@ -307,8 +359,67 @@ async function eliminarDieta(id) {
   }
 }
 
+async function guardarSeguimiento() {
+  if (!progresoForm.peso || !progresoForm.fecha) {
+    feedback.value = 'Completa peso y fecha para guardar el seguimiento.'
+    return
+  }
+
+  const nuevoRegistro = {
+    id: Date.now(),
+    peso: Number(progresoForm.peso),
+    fecha: progresoForm.fecha,
+    nota: progresoForm.nota.trim(),
+  }
+
+  if (session?.id) {
+    try {
+      const data = await createRegistroPeso({
+        usuario_id: session.id,
+        peso: nuevoRegistro.peso,
+        nota: nuevoRegistro.nota,
+        fecha_registro: nuevoRegistro.fecha,
+      })
+      nuevoRegistro.id = data.id
+      feedback.value = 'Seguimiento de peso guardado en el backend.'
+    } catch {
+      feedback.value = 'Seguimiento guardado solo en modo local.'
+    }
+  } else {
+    feedback.value = 'Seguimiento guardado en modo demo local.'
+  }
+
+  progreso.value.unshift(nuevoRegistro)
+  progreso.value.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+  guardarProgresoLocal()
+  progresoForm.peso = Number(session?.peso_actual || nuevoRegistro.peso)
+  progresoForm.fecha = new Date().toISOString().slice(0, 10)
+  progresoForm.nota = ''
+}
+
+async function eliminarSeguimiento(id) {
+  const anterior = [...progreso.value]
+  progreso.value = progreso.value.filter((registro) => registro.id !== id)
+
+  if (session?.id) {
+    try {
+      await removeRegistroPeso(id)
+      feedback.value = 'Registro de peso eliminado correctamente.'
+    } catch {
+      progreso.value = anterior
+      feedback.value = 'No se pudo eliminar el registro en el backend.'
+      return
+    }
+  } else {
+    feedback.value = 'Registro eliminado en modo demo local.'
+  }
+
+  guardarProgresoLocal()
+}
+
 onMounted(() => {
   cargarDietas()
+  cargarProgreso()
 })
 </script>
 
@@ -384,6 +495,82 @@ onMounted(() => {
         <p class="filter-title">Recomendacion automatica</p>
         <p class="profile-text">{{ recomendacion }}</p>
       </div>
+    </section>
+
+    <section v-if="session" class="tracking-grid">
+      <form class="panel tracking-form" @submit.prevent="guardarSeguimiento">
+        <div>
+          <p class="filter-title">Seguimiento semanal</p>
+          <h3>Registrar peso</h3>
+          <p class="form-note">Guarda un peso por fecha para mostrar la evolucion del usuario.</p>
+        </div>
+
+        <div class="split">
+          <input
+            v-model="progresoForm.peso"
+            type="number"
+            min="25"
+            max="300"
+            step="0.1"
+            placeholder="Peso en kg"
+            required
+          />
+          <input v-model="progresoForm.fecha" type="date" required />
+        </div>
+
+        <textarea
+          v-model="progresoForm.nota"
+          rows="3"
+          placeholder="Nota opcional del seguimiento"
+        />
+
+        <button type="submit">Guardar seguimiento</button>
+      </form>
+
+      <section class="panel tracking-summary">
+        <div>
+          <p class="filter-title">Historial</p>
+          <h3>Progreso de peso</h3>
+        </div>
+
+        <div class="profile-metrics">
+          <div class="profile-item">
+            <span>Ultimo peso</span>
+            <strong>{{ ultimoRegistro ? `${ultimoRegistro.peso} kg` : '--' }}</strong>
+          </div>
+          <div class="profile-item">
+            <span>Variacion</span>
+            <strong>
+              {{
+                variacionPeso === null
+                  ? '--'
+                  : `${Number(variacionPeso) > 0 ? '+' : ''}${variacionPeso} kg`
+              }}
+            </strong>
+          </div>
+          <div class="profile-item">
+            <span>Registros</span>
+            <strong>{{ progreso.length }}</strong>
+          </div>
+        </div>
+
+        <div v-if="progreso.length" class="tracking-list">
+          <article v-for="registro in progreso" :key="registro.id" class="tracking-card">
+            <div>
+              <strong>{{ registro.peso }} kg</strong>
+              <p>{{ registro.fecha }}</p>
+              <small v-if="registro.nota">{{ registro.nota }}</small>
+            </div>
+            <button class="danger" type="button" @click="eliminarSeguimiento(registro.id)">
+              Eliminar
+            </button>
+          </article>
+        </div>
+        <div v-else class="empty panel">
+          <h3>Sin seguimiento todavia</h3>
+          <p>Agrega tu primer registro de peso para mostrar progreso semanal.</p>
+        </div>
+      </section>
     </section>
 
     <section class="filter-bar panel">

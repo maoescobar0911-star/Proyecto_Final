@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import RegistroView from '../views/RegistroView.vue'
 import DietasView from '../views/DietasView.vue'
 import AdminView from '../views/AdminView.vue'
+import { getSession } from '../services/session'
 
 const routes = [
   { path: '/', name: 'home', component: HomeView },
@@ -20,7 +21,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const session = JSON.parse(localStorage.getItem('planner-session') || 'null')
+  const session = getSession()
 
   if (to.meta.requiresAuth && !session) {
     return { path: '/login' }

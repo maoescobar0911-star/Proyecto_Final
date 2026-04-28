@@ -25,6 +25,17 @@ CREATE TABLE IF NOT EXISTS dietas (
     ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS seguimiento_peso (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  peso DECIMAL(5,2) NOT NULL,
+  nota VARCHAR(180) DEFAULT '',
+  fecha_registro DATE NOT NULL,
+  CONSTRAINT fk_progreso_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON DELETE CASCADE
+);
+
 ALTER TABLE usuarios
 ADD COLUMN IF NOT EXISTS altura DECIMAL(3,2) NOT NULL DEFAULT 1.70;
 
