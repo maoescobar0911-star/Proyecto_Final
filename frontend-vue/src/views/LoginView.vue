@@ -1,13 +1,15 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { loginRequest } from '../services/auth'
-import { getLocalUsers, saveSession } from '../services/session'
+import { getLocalUsers } from '../services/session'
+import { useSessionStore } from '../stores/session'
 
 const form = reactive({
   email: '',
   password: '',
 })
 
+const sessionStore = useSessionStore()
 const message = ref('Ingresa con tu usuario para ver tus dietas.')
 
 async function login() {
@@ -17,7 +19,7 @@ async function login() {
       password: form.password,
     })
 
-    saveSession(data.user)
+    sessionStore.setSession(data)
     message.value = `Bienvenido, ${data.user.nombre}. Ya puedes entrar al panel.`
     return
   } catch (error) {
@@ -32,7 +34,7 @@ async function login() {
       return
     }
 
-    saveSession(existe)
+    sessionStore.setSession(existe)
     message.value = `Bienvenido, ${existe.nombre}. Entraste en modo demo local.`
   }
 }

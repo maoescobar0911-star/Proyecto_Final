@@ -26,8 +26,14 @@ const createUser = ({ nombre, email, password, altura, peso_actual, objetivo_per
   db.query(sql, [nombre, email, password, altura, peso_actual, objetivo_personal], callback);
 };
 
+const updatePasswordById = (id, password, callback) => {
+  const sql = 'UPDATE usuarios SET password = ? WHERE id = ?';
+  db.query(sql, [password, id], callback);
+};
+
 module.exports = {
   findByEmail,
   findAll,
   createUser,
+  updatePasswordById,
 };

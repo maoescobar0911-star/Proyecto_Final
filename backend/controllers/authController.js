@@ -1,10 +1,13 @@
 const userModel = require('../models/userModel');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const {
   calcularPesoIdeal,
   calcularImc,
   clasificarImc,
   generarRecomendacion,
 } = require('../utils/health');
+const { JWT_SECRET } = require('../middleware/authMiddleware');
 
 const register = (req, res) => {
   const { nombre, email, password, altura, peso_actual, objetivo_personal } = req.body;
@@ -33,11 +36,14 @@ const register = (req, res) => {
       return res.status(409).json({ msg: 'El correo ya esta registrado' });
     }
 
+    const passwordHash = bcrypt.hashSync(password, 10);
+    const rol = email === 'admin@planeador.com' ? 'admin' : 'usuario';
+
     userModel.createUser(
       {
         nombre,
         email,
-        password,
+        password: passwordHash,
         altura: alturaNumero,
         peso_actual: pesoActualNumero,
         objetivo_personal,
@@ -54,11 +60,20 @@ const register = (req, res) => {
 
         return res.status(201).json({
           msg: 'Usuario registrado correctamente',
+          token: jwt.sign(
+            {
+              id: insertResult.insertId,
+              email,
+              rol,
+            },
+            JWT_SECRET,
+            { expiresIn: '8h' },
+          ),
           user: {
             id: insertResult.insertId,
             nombre,
             email,
-            rol: email === 'admin@planeador.com' ? 'admin' : 'usuario',
+            rol,
             altura: alturaNumero,
             peso_actual: pesoActualNumero,
             objetivo_personal,
@@ -77,6 +92,41 @@ const register = (req, res) => {
   });
 };
 
+function responderLogin(res, user, rol) {
+  const imc = calcularImc(user.peso_actual, user.altura);
+  const clasificacion = clasificarImc(imc);
+
+  return res.json({
+    msg: 'Login exitoso',
+    token: jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        rol,
+      },
+      JWT_SECRET,
+      { expiresIn: '8h' },
+    ),
+    user: {
+      id: user.id,
+      nombre: user.nombre,
+      email: user.email,
+      rol,
+      altura: Number(user.altura),
+      peso_actual: Number(user.peso_actual),
+      objetivo_personal: user.objetivo_personal,
+      peso_ideal: calcularPesoIdeal(user.altura),
+      imc,
+      clasificacion_imc: clasificacion,
+      recomendacion: generarRecomendacion({
+        objetivo_personal: user.objetivo_personal,
+        imc,
+        clasificacion,
+      }),
+    },
+  });
+}
+
 const login = (req, res) => {
   const { email, password } = req.body;
 
@@ -94,34 +144,27 @@ const login = (req, res) => {
     }
 
     const user = results[0];
+    const rol = user.email === 'admin@planeador.com' ? 'admin' : 'usuario';
+    const pareceHashBcrypt = typeof user.password === 'string' && user.password.startsWith('$2');
+
+    if (pareceHashBcrypt) {
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(401).json({ msg: 'Contrasena incorrecta' });
+      }
+
+      return responderLogin(res, user, rol);
+    }
 
     if (user.password !== password) {
       return res.status(401).json({ msg: 'Contrasena incorrecta' });
     }
 
-    const imc = calcularImc(user.peso_actual, user.altura);
-    const clasificacion = clasificarImc(imc);
+    const passwordHash = bcrypt.hashSync(password, 10);
+    user.password = passwordHash;
 
-    return res.json({
-      msg: 'Login exitoso',
-      user: {
-        id: user.id,
-        nombre: user.nombre,
-        email: user.email,
-        rol: user.email === 'admin@planeador.com' ? 'admin' : 'usuario',
-        altura: Number(user.altura),
-        peso_actual: Number(user.peso_actual),
-        objetivo_personal: user.objetivo_personal,
-        peso_ideal: calcularPesoIdeal(user.altura),
-        imc,
-        clasificacion_imc: clasificacion,
-        recomendacion: generarRecomendacion({
-          objetivo_personal: user.objetivo_personal,
-          imc,
-          clasificacion,
-        }),
-      },
-    });
+    return userModel.updatePasswordById(user.id, passwordHash, () =>
+      responderLogin(res, user, rol),
+    );
   });
 };
 

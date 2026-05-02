@@ -1,5 +1,10 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
+import DietasHeader from '../components/DietasHeader.vue'
+import PerfilNutricional from '../components/PerfilNutricional.vue'
+import SeguimientoPeso from '../components/SeguimientoPeso.vue'
+import DietaEditor from '../components/DietaEditor.vue'
+import ListaDietas from '../components/ListaDietas.vue'
 import {
   createDieta,
   fetchDietas,
@@ -14,10 +19,10 @@ import {
 import {
   getLocalDietas,
   getLocalProgreso,
-  getSession,
   saveLocalDietas,
   saveLocalProgreso,
 } from '../services/session'
+import { useSessionStore } from '../stores/session'
 
 const form = reactive({
   nombre: '',
@@ -36,16 +41,18 @@ const editForm = reactive({
 
 const dietas = ref(getLocalDietas())
 const progreso = ref(getLocalProgreso())
-const session = getSession()
+const sessionStore = useSessionStore()
+const session = computed(() => sessionStore.user)
 const sourceLabel = ref('Modo demostracion local')
 const feedback = ref('')
 const filterObjetivo = ref('Todos')
+
 const pesoIdeal = computed(() => {
-  if (session?.peso_ideal) {
-    return Number(session.peso_ideal).toFixed(1)
+  if (session.value?.peso_ideal) {
+    return Number(session.value.peso_ideal).toFixed(1)
   }
 
-  const altura = Number(session?.altura)
+  const altura = Number(session.value?.altura)
 
   if (!altura || altura < 1 || altura > 2.5) {
     return null
@@ -53,13 +60,14 @@ const pesoIdeal = computed(() => {
 
   return (22 * altura * altura).toFixed(1)
 })
+
 const imc = computed(() => {
-  if (session?.imc) {
-    return Number(session.imc).toFixed(1)
+  if (session.value?.imc) {
+    return Number(session.value.imc).toFixed(1)
   }
 
-  const altura = Number(session?.altura)
-  const pesoActual = Number(session?.peso_actual)
+  const altura = Number(session.value?.altura)
+  const pesoActual = Number(session.value?.peso_actual)
 
   if (!altura || !pesoActual || altura < 1 || altura > 2.5) {
     return null
@@ -67,9 +75,10 @@ const imc = computed(() => {
 
   return (pesoActual / (altura * altura)).toFixed(1)
 })
+
 const clasificacionImc = computed(() => {
-  if (session?.clasificacion_imc) {
-    return session.clasificacion_imc
+  if (session.value?.clasificacion_imc) {
+    return session.value.clasificacion_imc
   }
 
   const valor = Number(imc.value)
@@ -92,27 +101,31 @@ const clasificacionImc = computed(() => {
 
   return 'Obesidad'
 })
+
 const recomendacion = computed(() => {
-  if (session?.recomendacion) {
-    return session.recomendacion
+  if (session.value?.recomendacion) {
+    return session.value.recomendacion
   }
 
-  if (session?.objetivo_personal === 'Bajar peso') {
+  if (session.value?.objetivo_personal === 'Bajar peso') {
     return 'Te conviene un plan con control calorico y seguimiento semanal.'
   }
 
-  if (session?.objetivo_personal === 'Ganar masa') {
+  if (session.value?.objetivo_personal === 'Ganar masa') {
     return 'Te conviene aumentar calorias y proteina de forma progresiva.'
   }
 
   return 'Tu meta puede centrarse en mantener un equilibrio alimenticio.'
 })
+
 const progresoForm = reactive({
-  peso: Number(session?.peso_actual || 70),
+  peso: Number(session.value?.peso_actual || 70),
   fecha: new Date().toISOString().slice(0, 10),
   nota: '',
 })
+
 const ultimoRegistro = computed(() => progreso.value[0] || null)
+
 const variacionPeso = computed(() => {
   if (progreso.value.length < 2) {
     return null
@@ -162,7 +175,7 @@ function guardarProgresoLocal() {
 }
 
 async function cargarDietas() {
-  if (!session?.id) {
+  if (!session.value?.id) {
     dietas.value = getLocalDietas()
     sourceLabel.value = 'Modo demostracion local'
     feedback.value = 'Estas trabajando en modo local para que la demo no se detenga.'
@@ -170,7 +183,7 @@ async function cargarDietas() {
   }
 
   try {
-    const data = await fetchDietas(session.id)
+    const data = await fetchDietas(session.value.id)
     dietas.value = data.map((dieta) => ({
       id: dieta.id,
       nombre: dieta.nombre,
@@ -191,13 +204,13 @@ async function cargarDietas() {
 }
 
 async function cargarProgreso() {
-  if (!session?.id) {
+  if (!session.value?.id) {
     progreso.value = getLocalProgreso()
     return
   }
 
   try {
-    const data = await fetchProgreso(session.id)
+    const data = await fetchProgreso(session.value.id)
     progreso.value = data.map((registro) => ({
       id: registro.id,
       peso: Number(registro.peso),
@@ -226,10 +239,10 @@ async function crearDieta() {
     fecha: new Date().toLocaleDateString(),
   }
 
-  if (session?.id) {
+  if (session.value?.id) {
     try {
       const data = await createDieta({
-        usuario_id: session.id,
+        usuario_id: session.value.id,
         nombre: nuevaDieta.nombre,
         descripcion: nuevaDieta.descripcion,
         objetivo: nuevaDieta.objetivo,
@@ -247,7 +260,7 @@ async function crearDieta() {
 
   dietas.value.unshift(nuevaDieta)
   guardarDietas()
-  if (!session?.id) {
+  if (!session.value?.id) {
     feedback.value = 'Dieta creada en modo demo local.'
   }
 
@@ -265,7 +278,7 @@ async function alternarEstado(id) {
 
   dieta.completada = !dieta.completada
 
-  if (session?.id && Number.isInteger(dieta.id)) {
+  if (session.value?.id && Number.isInteger(dieta.id)) {
     try {
       await updateDieta(dieta.id, {
         nombre: dieta.nombre,
@@ -314,7 +327,7 @@ async function guardarEdicion(id) {
   dieta.total_calorias = Number(editForm.calorias)
   dieta.descripcion = editForm.descripcion.trim()
 
-  if (session?.id && Number.isInteger(dieta.id)) {
+  if (session.value?.id && Number.isInteger(dieta.id)) {
     try {
       await updateDieta(dieta.id, {
         nombre: dieta.nombre,
@@ -332,7 +345,7 @@ async function guardarEdicion(id) {
   }
 
   guardarDietas()
-  if (!session?.id) {
+  if (!session.value?.id) {
     feedback.value = 'Cambios guardados en modo demo local.'
   }
   cancelarEdicion()
@@ -342,7 +355,7 @@ async function eliminarDieta(id) {
   const dieta = dietas.value.find((item) => item.id === id)
   dietas.value = dietas.value.filter((item) => item.id !== id)
 
-  if (session?.id && dieta && Number.isInteger(dieta.id)) {
+  if (session.value?.id && dieta && Number.isInteger(dieta.id)) {
     try {
       await removeDieta(dieta.id)
       sourceLabel.value = 'Conectado al backend'
@@ -354,7 +367,7 @@ async function eliminarDieta(id) {
   }
 
   guardarDietas()
-  if (!session?.id) {
+  if (!session.value?.id) {
     feedback.value = 'La dieta fue eliminada en modo demo local.'
   }
 }
@@ -372,10 +385,10 @@ async function guardarSeguimiento() {
     nota: progresoForm.nota.trim(),
   }
 
-  if (session?.id) {
+  if (session.value?.id) {
     try {
       const data = await createRegistroPeso({
-        usuario_id: session.id,
+        usuario_id: session.value.id,
         peso: nuevoRegistro.peso,
         nota: nuevoRegistro.nota,
         fecha_registro: nuevoRegistro.fecha,
@@ -392,7 +405,7 @@ async function guardarSeguimiento() {
   progreso.value.unshift(nuevoRegistro)
   progreso.value.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
   guardarProgresoLocal()
-  progresoForm.peso = Number(session?.peso_actual || nuevoRegistro.peso)
+  progresoForm.peso = Number(session.value?.peso_actual || nuevoRegistro.peso)
   progresoForm.fecha = new Date().toISOString().slice(0, 10)
   progresoForm.nota = ''
 }
@@ -401,7 +414,7 @@ async function eliminarSeguimiento(id) {
   const anterior = [...progreso.value]
   progreso.value = progreso.value.filter((registro) => registro.id !== id)
 
-  if (session?.id) {
+  if (session.value?.id) {
     try {
       await removeRegistroPeso(id)
       feedback.value = 'Registro de peso eliminado correctamente.'
@@ -418,6 +431,7 @@ async function eliminarSeguimiento(id) {
 }
 
 onMounted(() => {
+  sessionStore.hydrate()
   cargarDietas()
   cargarProgreso()
 })
@@ -425,153 +439,33 @@ onMounted(() => {
 
 <template>
   <section class="planner">
-    <div class="planner-header panel">
-      <div>
-        <p class="eyebrow">Panel principal</p>
-        <h2>Mis dietas</h2>
-        <p class="subtitle">
-          {{ session ? `Sesion activa: ${session.nombre}` : 'Modo demostracion sin sesion activa.' }}
-        </p>
-        <p v-if="session?.altura && pesoIdeal" class="subtitle">
-          Altura: {{ session.altura }} m | Peso ideal estimado: {{ pesoIdeal }} kg
-        </p>
-        <p class="subtitle">{{ sourceLabel }}</p>
-        <p class="feedback">{{ feedback }}</p>
-      </div>
+    <DietasHeader
+      :session="session"
+      :source-label="sourceLabel"
+      :feedback="feedback"
+      :dietas-length="dietas.length"
+      :total-activas="totalActivas"
+      :promedio-calorias="promedioCalorias"
+      :peso-ideal="pesoIdeal"
+    />
 
-      <div class="stats">
-        <div class="stat">
-          <strong>{{ dietas.length }}</strong>
-          <span>Planes</span>
-        </div>
-        <div class="stat">
-          <strong>{{ totalActivas }}</strong>
-          <span>Activas</span>
-        </div>
-        <div class="stat">
-          <strong>{{ promedioCalorias }}</strong>
-          <span>Kcal promedio</span>
-        </div>
-      </div>
-    </div>
+    <PerfilNutricional
+      :session="session"
+      :peso-ideal="pesoIdeal"
+      :imc="imc"
+      :clasificacion-imc="clasificacionImc"
+      :recomendacion="recomendacion"
+    />
 
-    <section v-if="session" class="profile-card panel">
-      <div>
-        <p class="filter-title">Perfil nutricional</p>
-        <h3>{{ session.nombre }}</h3>
-        <p class="profile-text">
-          Resumen calculado con la altura y el peso actual registrados por el usuario.
-        </p>
-      </div>
-
-      <div class="profile-metrics">
-        <div class="profile-item">
-          <span>Altura</span>
-          <strong>{{ session.altura || '--' }} m</strong>
-        </div>
-        <div class="profile-item">
-          <span>Peso actual</span>
-          <strong>{{ session.peso_actual || '--' }} kg</strong>
-        </div>
-        <div class="profile-item">
-          <span>Peso ideal</span>
-          <strong>{{ pesoIdeal || '--' }} kg</strong>
-        </div>
-        <div class="profile-item">
-          <span>IMC</span>
-          <strong>{{ imc || '--' }}</strong>
-        </div>
-        <div class="profile-item">
-          <span>Objetivo</span>
-          <strong>{{ session.objetivo_personal || 'Sin definir' }}</strong>
-        </div>
-        <div class="profile-item">
-          <span>Clasificacion</span>
-          <strong>{{ clasificacionImc || 'Sin datos' }}</strong>
-        </div>
-      </div>
-
-      <div class="recommendation-box">
-        <p class="filter-title">Recomendacion automatica</p>
-        <p class="profile-text">{{ recomendacion }}</p>
-      </div>
-    </section>
-
-    <section v-if="session" class="tracking-grid">
-      <form class="panel tracking-form" @submit.prevent="guardarSeguimiento">
-        <div>
-          <p class="filter-title">Seguimiento semanal</p>
-          <h3>Registrar peso</h3>
-          <p class="form-note">Guarda un peso por fecha para mostrar la evolucion del usuario.</p>
-        </div>
-
-        <div class="split">
-          <input
-            v-model="progresoForm.peso"
-            type="number"
-            min="25"
-            max="300"
-            step="0.1"
-            placeholder="Peso en kg"
-            required
-          />
-          <input v-model="progresoForm.fecha" type="date" required />
-        </div>
-
-        <textarea
-          v-model="progresoForm.nota"
-          rows="3"
-          placeholder="Nota opcional del seguimiento"
-        />
-
-        <button type="submit">Guardar seguimiento</button>
-      </form>
-
-      <section class="panel tracking-summary">
-        <div>
-          <p class="filter-title">Historial</p>
-          <h3>Progreso de peso</h3>
-        </div>
-
-        <div class="profile-metrics">
-          <div class="profile-item">
-            <span>Ultimo peso</span>
-            <strong>{{ ultimoRegistro ? `${ultimoRegistro.peso} kg` : '--' }}</strong>
-          </div>
-          <div class="profile-item">
-            <span>Variacion</span>
-            <strong>
-              {{
-                variacionPeso === null
-                  ? '--'
-                  : `${Number(variacionPeso) > 0 ? '+' : ''}${variacionPeso} kg`
-              }}
-            </strong>
-          </div>
-          <div class="profile-item">
-            <span>Registros</span>
-            <strong>{{ progreso.length }}</strong>
-          </div>
-        </div>
-
-        <div v-if="progreso.length" class="tracking-list">
-          <article v-for="registro in progreso" :key="registro.id" class="tracking-card">
-            <div>
-              <strong>{{ registro.peso }} kg</strong>
-              <p>{{ registro.fecha }}</p>
-              <small v-if="registro.nota">{{ registro.nota }}</small>
-            </div>
-            <button class="danger" type="button" @click="eliminarSeguimiento(registro.id)">
-              Eliminar
-            </button>
-          </article>
-        </div>
-        <div v-else class="empty panel">
-          <h3>Sin seguimiento todavia</h3>
-          <p>Agrega tu primer registro de peso para mostrar progreso semanal.</p>
-        </div>
-      </section>
-    </section>
+    <SeguimientoPeso
+      :session="session"
+      :progreso-form="progresoForm"
+      :ultimo-registro="ultimoRegistro"
+      :variacion-peso="variacionPeso"
+      :progreso="progreso"
+      @save="guardarSeguimiento"
+      @delete="eliminarSeguimiento"
+    />
 
     <section class="filter-bar panel">
       <div>
@@ -588,98 +482,18 @@ onMounted(() => {
     </section>
 
     <div class="planner-grid">
-      <form class="editor panel" @submit.prevent="crearDieta">
-        <h3>Nueva dieta</h3>
-        <p class="form-note">Registra aqui un plan alimenticio como parte del avance del proyecto.</p>
-        <input v-model="form.nombre" type="text" placeholder="Nombre del plan" required />
+      <DietaEditor :form="form" @submit="crearDieta" />
 
-        <div class="split">
-          <select v-model="form.objetivo">
-            <option>Definicion</option>
-            <option>Mantenimiento</option>
-            <option>Volumen</option>
-          </select>
-
-          <input
-            v-model="form.calorias"
-            type="number"
-            min="1000"
-            step="50"
-            placeholder="Calorias"
-            required
-          />
-        </div>
-
-        <textarea
-          v-model="form.descripcion"
-          rows="7"
-          placeholder="Describe comidas, horarios o recomendaciones"
-          required
-        />
-
-        <button type="submit">Guardar dieta</button>
-      </form>
-
-      <div class="dietas-list">
-        <article v-for="dieta in dietasFiltradas" :key="dieta.id" class="diet-card panel">
-          <template v-if="editingId === dieta.id">
-            <div class="diet-edit">
-              <input v-model="editForm.nombre" type="text" placeholder="Nombre del plan" />
-              <div class="split">
-                <select v-model="editForm.objetivo">
-                  <option>Definicion</option>
-                  <option>Mantenimiento</option>
-                  <option>Volumen</option>
-                </select>
-                <input v-model="editForm.calorias" type="number" min="1000" step="50" />
-              </div>
-              <textarea v-model="editForm.descripcion" rows="5" />
-              <div class="actions">
-                <button class="save" type="button" @click="guardarEdicion(dieta.id)">Guardar cambios</button>
-                <button class="ghost" type="button" @click="cancelarEdicion">Cancelar</button>
-              </div>
-            </div>
-          </template>
-
-          <template v-else>
-            <div class="diet-top">
-              <div class="diet-main">
-                <div class="chips">
-                  <p class="chip">{{ dieta.objetivo }}</p>
-                  <p class="status" :data-done="dieta.completada">
-                    {{ dieta.completada ? 'Completada' : 'Activa' }}
-                  </p>
-                </div>
-                <h3 class="diet-title">{{ dieta.nombre }}</h3>
-                <p class="diet-meta">Plan creado para seguimiento alimenticio personal.</p>
-              </div>
-              <span class="calories">{{ dieta.total_calorias }} kcal</span>
-            </div>
-
-            <p class="diet-body">{{ dieta.descripcion }}</p>
-
-            <div class="diet-bottom">
-              <small class="diet-date">Actualizado: {{ dieta.fecha }}</small>
-              <div class="actions">
-                <button class="edit" type="button" @click="iniciarEdicion(dieta)">
-                  Editar
-                </button>
-                <button class="ghost" type="button" @click="alternarEstado(dieta.id)">
-                  {{ dieta.completada ? 'Marcar activa' : 'Completar plan' }}
-                </button>
-                <button class="danger" type="button" @click="eliminarDieta(dieta.id)">
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          </template>
-        </article>
-
-        <div v-if="!dietasFiltradas.length" class="empty panel">
-          <h3>No hay dietas todavia</h3>
-          <p>No hay resultados para ese filtro o aun no has creado dietas.</p>
-        </div>
-      </div>
+      <ListaDietas
+        :dietas="dietasFiltradas"
+        :editing-id="editingId"
+        :edit-form="editForm"
+        @edit-start="iniciarEdicion"
+        @edit-save="guardarEdicion"
+        @edit-cancel="cancelarEdicion"
+        @toggle="alternarEstado"
+        @delete="eliminarDieta"
+      />
     </div>
   </section>
 </template>

@@ -1,4 +1,5 @@
 const express = require('express');
+const { authRequired } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 const {
@@ -7,8 +8,8 @@ const {
   eliminarRegistro,
 } = require('../controllers/progresoController');
 
-router.get('/', obtenerProgreso);
-router.post('/', crearRegistro);
-router.delete('/:id', eliminarRegistro);
+router.get('/', authRequired, obtenerProgreso);
+router.post('/', authRequired, crearRegistro);
+router.delete('/:id', authRequired, eliminarRegistro);
 
 module.exports = router;

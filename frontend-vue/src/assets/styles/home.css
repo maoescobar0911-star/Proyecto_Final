@@ -1,33 +1,35 @@
 .hero {
   display: grid;
-  grid-template-columns: 1.5fr 0.9fr;
-  gap: 24px;
-  padding: 34px;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.95fr);
+  gap: 28px;
+  padding: 38px;
   background:
-    radial-gradient(circle at right top, rgba(217, 166, 65, 0.22), transparent 35%),
-    rgba(255, 250, 240, 0.92);
+    radial-gradient(circle at 85% 12%, rgba(217, 166, 65, 0.22), transparent 26%),
+    linear-gradient(180deg, rgba(255, 251, 243, 0.96), rgba(247, 239, 221, 0.9));
 }
 
 .tag {
-  margin: 0 0 10px;
-  color: #8a6a22;
+  margin: 0 0 12px;
+  color: #10ca54;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
+  font-size: 0.8rem;
 }
 
 h2 {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3.25rem);
-  line-height: 1.1;
-  color: #5c5a2d;
+  font-size: clamp(2.3rem, 5vw, 4rem);
+  line-height: 1.02;
+  max-width: 12ch;
+  color: #4f4a24;
 }
 
 .lead {
-  margin: 18px 0 0;
-  max-width: 58ch;
-  font-size: 1.05rem;
-  line-height: 1.85;
+  margin: 22px 0 0;
+  max-width: 60ch;
+  font-size: 1.03rem;
+  line-height: 1.9;
   color: #5b4f3a;
 }
 
@@ -35,46 +37,82 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 26px;
+  margin-top: 28px;
 }
 
 .primary,
 .secondary {
-  padding: 12px 18px;
-  border-radius: 14px;
+  padding: 13px 18px;
+  border-radius: 16px;
   font-weight: 700;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .primary:hover,
 .secondary:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .primary {
   background: #c89b2e;
   color: #fffaf0;
-  box-shadow: 0 10px 24px rgba(200, 155, 46, 0.24);
+  box-shadow: 0 14px 28px rgba(200, 155, 46, 0.26);
 }
 
 .secondary {
-  background: #efe1bf;
+  background: rgba(255, 251, 243, 0.82);
   color: #5c5a2d;
   border: 1px solid #d8c28c;
 }
 
 .hero-note {
-  display: flex;
-  align-items: center;
+  display: grid;
+  gap: 14px;
+  align-content: stretch;
+}
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.metric-card {
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(255, 251, 243, 0.76);
+  border: 1px solid rgba(145, 128, 74, 0.14);
+}
+
+.metric-card span {
+  display: block;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a6a22;
+  margin-bottom: 8px;
+}
+
+.metric-card strong {
+  color: #4f4a24;
+  font-size: 1rem;
+  line-height: 1.35;
 }
 
 .note-card {
   width: 100%;
-  padding: 22px;
+  padding: 22px 22px 24px;
   border-radius: 22px;
-  background: linear-gradient(180deg, #fffaf0 0%, #f3e5bd 100%);
-  border: 1px solid #dcc78f;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: linear-gradient(180deg, rgba(255, 251, 243, 0.98), rgba(243, 229, 189, 0.92));
+  border: 1px solid rgba(220, 199, 143, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 14px 28px rgba(103, 84, 49, 0.08);
+}
+
+.note-card-main {
+  min-height: 180px;
 }
 
 .note-label {
@@ -89,12 +127,16 @@ h2 {
 .note-text {
   margin: 0;
   color: #5b4f3a;
-  line-height: 1.75;
+  line-height: 1.8;
 }
 
 @media (max-width: 760px) {
   .hero {
     grid-template-columns: 1fr;
     padding: 24px;
+  }
+
+  .hero-metrics {
+    grid-template-columns: 1fr;
   }
 }

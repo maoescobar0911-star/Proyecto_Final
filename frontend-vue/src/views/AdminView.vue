@@ -1,9 +1,10 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { buildLocalAdminResumen, fetchAdminResumen } from '../services/admin'
-import { getSession } from '../services/session'
+import { useSessionStore } from '../stores/session'
 
-const session = getSession()
+const sessionStore = useSessionStore()
+const session = computed(() => sessionStore.user)
 const usuarios = ref([])
 const dietas = ref([])
 const resumen = ref({
@@ -71,6 +72,24 @@ onMounted(() => {
       </div>
     </div>
 
+    <section class="admin-highlight panel">
+      <article class="highlight-card">
+        <span class="highlight-label">Control general</span>
+        <strong>{{ resumen.total_usuarios }}</strong>
+        <p>usuarios registrados dentro del sistema</p>
+      </article>
+      <article class="highlight-card">
+        <span class="highlight-label">Actividad</span>
+        <strong>{{ resumen.dietas_activas }}</strong>
+        <p>dietas activas en seguimiento</p>
+      </article>
+      <article class="highlight-card">
+        <span class="highlight-label">Cierre</span>
+        <strong>{{ resumen.dietas_completadas }}</strong>
+        <p>dietas completadas por los usuarios</p>
+      </article>
+    </section>
+
     <div class="admin-grid">
       <section class="panel admin-section">
         <div class="section-head">
@@ -80,9 +99,14 @@ onMounted(() => {
 
         <div v-if="usuarios.length" class="data-list">
           <article v-for="usuario in usuarios" :key="usuario.id" class="data-card">
-            <h4>{{ usuario.nombre }}</h4>
-            <p>{{ usuario.email }}</p>
-            <small>Objetivo: {{ usuario.objetivo_personal || 'Sin definir' }}</small>
+            <div class="data-card-top">
+              <div>
+                <h4>{{ usuario.nombre }}</h4>
+                <p>{{ usuario.email }}</p>
+              </div>
+              <span class="pill">{{ usuario.objetivo_personal || 'Sin definir' }}</span>
+            </div>
+            <small>Perfil registrado dentro del sistema principal.</small>
           </article>
         </div>
         <div v-else class="empty-state">
@@ -98,11 +122,14 @@ onMounted(() => {
 
         <div v-if="dietas.length" class="data-list">
           <article v-for="dieta in dietas" :key="dieta.id" class="data-card">
-            <h4>{{ dieta.nombre }}</h4>
-            <p>{{ dieta.usuario || 'Usuario local' }}</p>
-            <small>
-              {{ dieta.objetivo }} | {{ Number(dieta.total_calorias || 0) }} kcal
-            </small>
+            <div class="data-card-top">
+              <div>
+                <h4>{{ dieta.nombre }}</h4>
+                <p>{{ dieta.usuario || 'Usuario local' }}</p>
+              </div>
+              <span class="pill">{{ dieta.objetivo }}</span>
+            </div>
+            <small>{{ Number(dieta.total_calorias || 0) }} kcal registradas</small>
           </article>
         </div>
         <div v-else class="empty-state">

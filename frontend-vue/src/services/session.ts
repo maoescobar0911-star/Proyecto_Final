@@ -1,4 +1,5 @@
 const SESSION_KEY = 'planner-session'
+const TOKEN_KEY = 'planner-token'
 const USERS_KEY = 'planner-users'
 const DIETAS_KEY = 'planner-dietas'
 const PROGRESO_KEY = 'planner-progreso'
@@ -12,13 +13,33 @@ export function getSession() {
   return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null')
 }
 
-export function saveSession(user: unknown) {
+export function getToken() {
+  return sessionStorage.getItem(TOKEN_KEY)
+}
+
+export function saveSession(payload: unknown) {
   limpiarSesionAntigua()
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user))
+
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'user' in payload &&
+    'token' in payload &&
+    payload.user
+  ) {
+    const data = payload as { user: unknown; token: string }
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(data.user))
+    sessionStorage.setItem(TOKEN_KEY, data.token)
+    return
+  }
+
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(payload))
+  sessionStorage.removeItem(TOKEN_KEY)
 }
 
 export function clearSession() {
   sessionStorage.removeItem(SESSION_KEY)
+  sessionStorage.removeItem(TOKEN_KEY)
   limpiarSesionAntigua()
 }
 

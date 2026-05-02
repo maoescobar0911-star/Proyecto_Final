@@ -1,4 +1,5 @@
 const express = require('express');
+const { authRequired } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 const {
@@ -8,9 +9,9 @@ const {
   eliminarDieta,
 } = require('../controllers/dietaController');
 
-router.get('/', obtenerDietas);
-router.post('/', crearDieta);
-router.put('/:id', actualizarDieta);
-router.delete('/:id', eliminarDieta);
+router.get('/', authRequired, obtenerDietas);
+router.post('/', authRequired, crearDieta);
+router.put('/:id', authRequired, actualizarDieta);
+router.delete('/:id', authRequired, eliminarDieta);
 
 module.exports = router;

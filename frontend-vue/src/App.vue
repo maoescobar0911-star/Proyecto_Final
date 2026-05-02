@@ -1,17 +1,17 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Navbar from './components/Navbar.vue'
-import { clearSession, getSession } from './services/session'
+import { useSessionStore } from './stores/session'
 
 const route = useRoute()
 const router = useRouter()
-const session = ref(getSession())
+const sessionStore = useSessionStore()
 
 watch(
   () => route.fullPath,
   () => {
-    session.value = getSession()
+    sessionStore.hydrate()
   },
   { immediate: true },
 )
@@ -21,15 +21,14 @@ const isAuthView = computed(() =>
 )
 
 function cerrarSesion() {
-  clearSession()
-  session.value = null
+  sessionStore.logout()
   router.push('/login')
 }
 </script>
 
 <template>
   <div class="app-shell">
-    <Navbar :session="session" :is-auth-view="isAuthView" @logout="cerrarSesion" />
+    <Navbar :session="sessionStore.user" :is-auth-view="isAuthView" @logout="cerrarSesion" />
 
     <main class="content">
       <router-view />

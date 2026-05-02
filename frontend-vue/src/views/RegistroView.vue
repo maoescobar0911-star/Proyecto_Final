@@ -1,7 +1,8 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { registerRequest } from '../services/auth'
-import { getLocalUsers, saveLocalUsers, saveSession } from '../services/session'
+import { getLocalUsers, saveLocalUsers } from '../services/session'
+import { useSessionStore } from '../stores/session'
 
 const form = reactive({
   nombre: '',
@@ -12,6 +13,7 @@ const form = reactive({
   objetivoPersonal: 'Mantener peso',
 })
 
+const sessionStore = useSessionStore()
 const message = ref('Crea un usuario para registrar y organizar dietas.')
 const pesoIdeal = computed(() => {
   const altura = Number(form.altura)
@@ -44,7 +46,7 @@ async function registrar() {
       objetivo_personal: form.objetivoPersonal,
     })
 
-    saveSession(data.user)
+    sessionStore.setSession(data)
     message.value = `Usuario ${data.user.nombre} creado correctamente.`
   } catch (error) {
     const mensaje = error instanceof Error ? error.message : 'Error al registrar usuario.'
@@ -87,7 +89,7 @@ async function registrar() {
 
     usuarios.push(nuevoUsuario)
     saveLocalUsers(usuarios)
-    saveSession(nuevoUsuario)
+    sessionStore.setSession(nuevoUsuario)
     message.value = `Usuario ${form.nombre} creado en modo demo local porque el backend no respondio.`
   }
 
