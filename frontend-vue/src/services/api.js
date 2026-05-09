@@ -1,75 +1,67 @@
-const API_URL = 'http://localhost:3000/api'
+import axios from 'axios'
 import { getToken } from './session'
 
-function buildHeaders(extraHeaders = {}) {
+const apiClient = axios.create({
+  baseURL: 'http://localhost:3000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+apiClient.interceptors.request.use((config) => {
   const token = getToken()
 
-  return {
-    ...extraHeaders,
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
   }
+
+  return config
+})
+
+function normalizarError(error) {
+  const message =
+    error?.response?.data?.msg ||
+    error?.response?.data?.error ||
+    error?.message ||
+    'Error de servidor'
+
+  throw new Error(message)
 }
 
 export async function postJson(path, body) {
-  const response = await fetch(`${API_URL}${path}`, {
-    method: 'POST',
-    headers: buildHeaders({
-      'Content-Type': 'application/json',
-    }),
-    body: JSON.stringify(body),
-  })
-
-  const data = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    throw new Error(data.msg || data.error || 'Error de servidor')
+  try {
+    const { data } = await apiClient.post(path, body)
+    return data
+  } catch (error) {
+    normalizarError(error)
   }
-
-  return data
 }
 
 export async function getJson(path) {
-  const response = await fetch(`${API_URL}${path}`, {
-    headers: buildHeaders(),
-  })
-  const data = await response.json().catch(() => [])
-
-  if (!response.ok) {
-    throw new Error(data.msg || data.error || 'Error de servidor')
+  try {
+    const { data } = await apiClient.get(path)
+    return data
+  } catch (error) {
+    normalizarError(error)
   }
-
-  return data
 }
 
 export async function putJson(path, body) {
-  const response = await fetch(`${API_URL}${path}`, {
-    method: 'PUT',
-    headers: buildHeaders({
-      'Content-Type': 'application/json',
-    }),
-    body: JSON.stringify(body),
-  })
-
-  const data = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    throw new Error(data.msg || data.error || 'Error de servidor')
+  try {
+    const { data } = await apiClient.put(path, body)
+    return data
+  } catch (error) {
+    normalizarError(error)
   }
-
-  return data
 }
 
 export async function deleteJson(path) {
-  const response = await fetch(`${API_URL}${path}`, {
-    method: 'DELETE',
-    headers: buildHeaders(),
-  })
-
-  const data = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    throw new Error(data.msg || data.error || 'Error de servidor')
+  try {
+    const { data } = await apiClient.delete(path)
+    return data
+  } catch (error) {
+    normalizarError(error)
   }
-
-  return data
 }
+
+export { apiClient }
